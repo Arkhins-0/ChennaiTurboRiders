@@ -65,7 +65,7 @@ src/
   components/site/   this site's own components
   styles/globals.css
 migrations/          NNNN_name.sql, applied in order, checksummed
-scripts/             migrate, seed, create-admin, media tooling
+scripts/             migrate, seed, create-admin, storage:copy (move media between buckets)
 ```
 
 `lib/` and `lib/server/` are split by what may reach the browser: anything under
@@ -155,8 +155,8 @@ short version:
 | `SITE_URL` | the public origin. Every canonical URL, the sitemap and the OG tags are built from it. Read at **build** time. |
 | `ADMIN_HOSTS` | which hostnames serve the console. Needed at **build** time too — middleware runs in the Edge runtime. |
 | `DATABASE_URL` | Neon Postgres. Every table is in the `ctr` schema. |
-| `S3_*` | the media bucket. Unset, image fields still take pasted URLs. |
-| `NEXT_PUBLIC_MEDIA_BASE_URL` | the CDN in front of the bucket. Inlined at **build** time, so changing it needs a redeploy. |
+| `S3_*` | the media bucket — Neon object storage (set `S3_ENDPOINT`) or plain AWS. Unset, image fields still take pasted URLs. |
+| `NEXT_PUBLIC_MEDIA_BASE_URL` | where media is served from: `S3_ENDPOINT/S3_BUCKET` on Neon, or the CDN in front of an AWS bucket. Inlined at **build** time, so changing it needs a redeploy. |
 
 No domain is written down in the source. `SITE_URL` and `ADMIN_HOSTS` are the
 only place this deployment learns its own name.

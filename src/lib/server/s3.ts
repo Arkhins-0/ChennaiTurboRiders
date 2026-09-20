@@ -38,6 +38,12 @@ export const ENTRY_PREFIX = "ctr-sports/entries/";
 
 const BUCKET = process.env.S3_BUCKET;
 const REGION = process.env.S3_REGION;
+/*
+ * An S3-compatible store instead of AWS — Neon object storage, R2, MinIO.
+ * Optional; unset means plain AWS. Those services are path-style only
+ * (`https://endpoint/bucket/key`), so setting it also switches addressing.
+ */
+const ENDPOINT = process.env.S3_ENDPOINT?.replace(/\/+$/, "") || undefined;
 
 let client: S3Client | null = null;
 
@@ -53,7 +59,12 @@ function getClient(): S3Client {
     );
   }
 
-  client = new S3Client({ region: REGION, credentials: { accessKeyId, secretAccessKey } });
+  client = new S3Client({
+    region: REGION,
+    endpoint: ENDPOINT,
+    forcePathStyle: Boolean(ENDPOINT),
+    credentials: { accessKeyId, secretAccessKey },
+  });
   return client;
 }
 
@@ -88,7 +99,9 @@ export function publicUrl(key: string): string {
     process.env.S3_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_MEDIA_BASE_URL
   )?.replace(/\/+$/, "");
 
-  return base ? `${base}/${key}` : `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
+  if (base) return `${base}/${key}`;
+  if (ENDPOINT) return `${ENDPOINT}/${BUCKET}/${key}`;
+  return `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
 }
 
 /**
