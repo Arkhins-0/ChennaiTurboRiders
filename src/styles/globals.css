@@ -1,10 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Roboto:wght@300;400;500;700;900&display=swap');
+/*
+ * Fonts are loaded with next/font in src/app/layout.tsx, never with an @import —
+ * an @import here would be render-blocking and would open connections to two
+ * extra hosts before the page can paint.
+ */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Base Reset ─── */
 @layer base {
   * {
     margin: 0;
@@ -16,158 +19,407 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Clears the top of the card when an anchor link jumps down the page. */
+    scroll-padding-top: 2rem;
+    color-scheme: dark;
   }
 
   body {
-    @apply bg-carbon-950 text-white font-body;
+    @apply bg-page font-body text-fg;
     overflow-x: hidden;
   }
 
+  /*
+   * The console is an application, not a document.
+   *
+   * Its shell is `h-screen` with each pane scrolling on its own, and that is
+   * only true if the PAGE cannot scroll. Without this it could: anything that
+   * escaped the shell's clipping — an absolutely positioned descendant, a
+   * transform, a stray tall child — made the document taller than the window,
+   * and scrolling to the bottom carried the whole interface off the top into
+   * empty space.
+   *
+   * Keyed on the shell's own attribute with `:has()` rather than a class on
+   * `<body>`, because a route cannot set one: `<body>` belongs to the root
+   * layout, which the public site shares and which MUST go on scrolling. No
+   * JavaScript either, so it holds from the first paint rather than from
+   * hydration.
+   *
+   * The breakpoint matches the shell's. Below `md:` the console deliberately IS
+   * one scrolling document — the sidebar becomes a row of chips and the panes
+   * stack — and locking it there would strand everything below the fold.
+   */
+  @media (min-width: 768px) {
+    html:has([data-admin-shell]),
+    html:has([data-admin-shell]) body {
+      height: 100%;
+      overflow: hidden;
+    }
+  }
+
   ::selection {
-    background: rgba(247, 214, 25, 0.5);
-    color: white;
+    background: rgba(247, 214, 25, 0.35);
+    color: #f3f5f7;
+  }
+
+  /*
+   * The list a <select> drops down.
+   *
+   * Every select in this project is `bg-transparent` — the fields are outlines
+   * on whatever card they sit on, which is what keeps both designs flat. That
+   * works for the CLOSED control, but the open list is painted by the browser
+   * from the OPTION's own colours, and a transparent option leaves it picking
+   * system ones: on Windows that is near-black type on a dark popup, so every
+   * choice but the highlighted one is invisible.
+   *
+   * So the two colours are stated here, literally. Options cannot be reached
+   * from the components that render them — the callers write the <option> tags
+   * — and utility classes on a child of a select are ignored by the popup in any
+   * case, so a base rule is the only place this can live.
+   *
+   * The site's palette is the default. `.font-ui` is the admin subtree, which
+   * marks itself with that class precisely because it has to be recognisable
+   * from outside the tree — Dialog carries it for the same reason, being
+   * portalled to the body. The two palettes never share a value.
+   */
+  option,
+  optgroup {
+    background-color: #1b2027; /* panel */
+    color: #ffffff; /* fg */
+  }
+
+  .font-ui option,
+  .font-ui optgroup {
+    background-color: #2c2c2c; /* card */
+    color: #fbfbfb; /* foreground */
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 10px;
   }
-
   ::-webkit-scrollbar-track {
-    background: #0a0a0a;
+    background: #050506;
   }
-
   ::-webkit-scrollbar-thumb {
-    background: #F7D619;
-    border-radius: 3px;
+    background: #2c313a;
+    border-radius: 5px;
+    border: 2px solid #050506;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3d4450;
   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    background: #ffed33;
+  /* Accent, so the ring is visible on the site and in the admin alike. */
+  :focus-visible {
+    outline: 3px solid #f7d619;
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
 
-/* ─── Utility Classes ─── */
 @layer components {
-  .section-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  /* The one horizontal rhythm every section inside the card shares.
+     Sized against the card's own 1920 cap, so the margin either side of the
+     content stays in the same proportion it had at 1440. */
+  .shell {
+    @apply mx-auto w-full max-w-[1560px] px-5 sm:px-8;
   }
 
-  .section-padding {
-    @apply py-20 md:py-28 lg:py-32;
+  /* Big sentence-case headline. Sizes come from the caller. */
+  .headline {
+    @apply font-display font-extrabold leading-[1.06] tracking-[-0.02em] text-fg;
   }
 
-  .heading-xl {
-    @apply font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-tight leading-none;
+  .body-copy {
+    @apply text-[15px] leading-relaxed text-fg-muted;
   }
 
-  .heading-lg {
-    @apply font-heading font-bold text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight leading-tight;
+  /* Raised block inside the card — the design's basic building block. */
+  .panel-card {
+    @apply rounded-panel border border-line bg-panel;
   }
 
-  .heading-md {
-    @apply font-heading font-semibold text-2xl sm:text-3xl md:text-4xl uppercase tracking-tight;
+  /* A row that scrolls sideways with no bar under it.
+     The global scrollbar rule above is sized for a page's vertical bar; on a
+     one-line row of links it would take a third of the row's height and appear
+     only on the phones where the links happen not to fit, which is the least
+     predictable place to put a control. Swiping is the gesture on a touch
+     screen anyway. */
+  .rail-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .rail-scroll::-webkit-scrollbar {
+    display: none;
   }
 
-  .label-text {
-    @apply font-heading font-semibold text-xs sm:text-sm uppercase tracking-[0.25em] text-racing-yellow;
+  /* Small outlined chip that labels a section. */
+  .pill-label {
+    @apply inline-flex items-center rounded-full border border-line bg-panel px-4 py-1.5
+      text-[11px] font-semibold tracking-wide text-fg-muted;
   }
 
-  .body-text {
-    @apply font-body font-medium text-base md:text-lg text-carbon-300 leading-relaxed;
+  /*
+   * A photo collage laid out from an arrangement chosen in the admin.
+   *
+   * The arrangement itself is data — src/lib/collage.ts — handed over as four
+   * custom properties, because grid-template-areas cannot be written as a
+   * utility class and a Tailwind class assembled from a variable is not in the
+   * stylesheet at all. What CAN be a rule is WHEN the arrangement applies, and
+   * that is the whole reason this is here rather than inline: below md the
+   * areas are dropped and the photographs stack, which is the only arrangement
+   * that works at 375px whatever was picked.
+   */
+  .collage {
+    @apply grid gap-3 sm:gap-4;
   }
 
-  /* Red accent line */
-  .red-line {
-    @apply w-12 h-[3px] bg-racing-yellow;
-    
+  @media (min-width: 768px) {
+    .collage {
+      grid-template-areas: var(--collage-areas);
+      grid-template-columns: var(--collage-cols);
+      grid-template-rows: var(--collage-rows);
+      aspect-ratio: var(--collage-ratio);
+    }
+
+    .collage > * {
+      grid-area: var(--collage-cell);
+    }
   }
 
-  .red-line-lg {
-    @apply w-20 h-1 bg-racing-yellow;
-  }
-
-  /* Button styles */
-  .btn-primary {
-    @apply inline-flex items-center gap-2 px-8 py-3 bg-racing-yellow text-carbon-950 font-heading font-semibold uppercase tracking-wider text-sm 
-    transition-all duration-300 hover:bg-racing-yellow-dark hover:shadow-[0_0_30px_rgba(247,214,25,0.3)] 
-    active:scale-95 relative overflow-hidden;
-  }
-
-  .btn-outline {
-    @apply inline-flex items-center gap-2 px-8 py-3 border border-white/30 text-white font-heading font-semibold uppercase tracking-wider text-sm 
-    transition-all duration-300 hover:border-racing-yellow hover:text-racing-yellow hover:shadow-[0_0_20px_rgba(247,214,25,0.15)]
-    active:scale-95;
-  }
-
-  /* Card with carbon fiber texture */
-  .carbon-card {
-    @apply bg-carbon-800 border border-carbon-600/30 relative overflow-hidden;
+  /*
+   * The diagonal bars a hazard board wears.
+   *
+   * Yellow with black stripes: the sign at the end of a pit lane, and the one
+   * piece of decoration on an otherwise flat form. A class rather than a
+   * utility because two places wear it — the band along the bottom of a button
+   * and the strip across the top of the panel that replaces the form when an
+   * entry lands — and they must be the same bars at the same angle, or they
+   * read as two unrelated patterns.
+   *
+   * The colour is written out. A gradient stop cannot take a colour utility,
+   * and this one is `accent-ink` — the near-black that is the only thing
+   * allowed to sit on the yellow.
+   */
+  .hazard-bars {
+    /*
+     * 6px on, 6px off, at 45°.
+     *
+     * Finer than the bars looked at first, and the reason is the width they run
+     * across: seven-pixel bars on a 140px button gave about nine of them, which
+     * reads as a chevron pattern somebody chose. At six they read as paint on a
+     * sign, which is the point — the eye should take the band as one texture and
+     * move on to the word above it.
+     *
+     * The colour is written out. A gradient stop cannot take a colour utility,
+     * and this one is `accent-ink` — the near-black that is the only thing
+     * allowed to sit on the yellow.
+     */
     background-image: repeating-linear-gradient(
       45deg,
-      transparent,
-      transparent 2px,
-      rgba(255, 255, 255, 0.01) 2px,
-      rgba(255, 255, 255, 0.01) 4px
+      #0a0a0a 0 6px,
+      transparent 6px 12px
     );
   }
 
-  /* Diagonal separator */
-  .diagonal-sep {
+  /* Chip laid over a photo. */
+  .photo-chip {
+    @apply inline-flex items-center rounded-full bg-black/70 px-3 py-1.5 text-[11px]
+      font-semibold text-white backdrop-blur-sm;
+  }
+
+  /* ───────────────── Chennai Turbo Riders — the F4 pages ─────────────────
+     Carried over with the site's own components. These are classes rather than
+     utilities for the same reason as the ones above: each is a pattern with no
+     single-property equivalent, and each is worn by more than one component, so
+     a utility repeated at every call site would be a pattern with several
+     places to be changed. */
+
+  /* The site's horizontal rhythm. Narrower than `.shell` above, which belongs
+     to the section-built pages — the F4 pages were laid out against 80rem and
+     re-centring them on 1560px would reflow every one of them. */
+  .section-container {
+    @apply mx-auto w-full max-w-7xl px-5 md:px-8;
+  }
+
+  /* Rajdhani, with the tracking the headings were drawn with. */
+  .heading-font {
+    @apply font-display tracking-[0.02em];
+  }
+
+  /* Carbon-fibre weave: a 45° hairline pattern at 1.5% white, laid over a dark
+     surface rather than replacing it — it is a texture, not a background. */
+  .bg-carbon-weave {
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent 0 2px,
+      rgb(255 255 255 / 0.015) 2px 4px
+    );
+  }
+
+  /* Outlined display type — the oversized numerals behind section headings. */
+  .text-stroke-yellow {
+    -webkit-text-stroke: 1px theme("colors.racing-yellow.DEFAULT");
+    color: transparent;
+  }
+
+  /* ───────────────────── The broadcast layer ─────────────────────
+     The redesign's own patterns. Each is worn by several components, so
+     each is a class rather than a utility repeated at every call site. */
+
+  /* Film grain, laid over a photograph or the whole page. An SVG turbulence
+     tile at low opacity; `mix-blend-overlay` so it lifts the darks rather
+     than greying the lights. */
+  .grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+    mix-blend-mode: overlay;
+  }
+
+  /* The engineer's grid: a faint 1px lattice every 4rem, for the surfaces
+     the HUD readouts sit on. */
+  .hud-grid {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+    background-size: 4rem 4rem;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+  }
+
+  /* Horizontal scanlines over video — a broadcast feed, not a photograph. */
+  .scanlines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 3px,
+      rgb(0 0 0 / 0.18) 3px 4px
+    );
+  }
+
+  /* The navigation pill and anything else that floats over the page. */
+  .glass {
+    @apply border border-white/10 bg-carbon-950/60 backdrop-blur-xl;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+
+  /* Readout: the mono label of the broadcast graphics. */
+  .readout {
+    @apply font-mono text-[11px] uppercase tracking-[0.18em] text-carbon-300;
+  }
+
+  /* Outlined display type in white — the second voice of a headline. */
+  .text-stroke-white {
+    -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.85);
+    color: transparent;
+  }
+
+  /* The lean the headlines take: forward, like a car under braking. */
+  .lean {
+    transform: skewX(-8deg);
+  }
+
+  /* Buttons. Sharp corners, a hard lean on the label, a fill that arrives
+     from the left on hover. */
+  .btn {
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden
+      px-6 py-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.22em]
+      transition-colors duration-300;
+  }
+  .btn-primary {
+    @apply btn bg-racing-yellow text-carbon-950;
+  }
+  .btn-primary::before {
+    content: "";
+    @apply absolute inset-0 -translate-x-full bg-white transition-transform duration-300 ease-out;
+  }
+  .btn-primary:hover::before {
+    @apply translate-x-0;
+  }
+  .btn-primary > * {
     @apply relative;
   }
+  .btn-ghost {
+    @apply btn border border-white/20 text-white hover:border-racing-yellow hover:text-racing-yellow;
+  }
 
-  .diagonal-sep::after {
+  /* Corner brackets, the viewfinder of a broadcast camera. */
+  .hud-corners {
+    @apply relative;
+  }
+  .hud-corners::before,
+  .hud-corners::after {
     content: "";
-    @apply absolute bottom-0 left-0 w-full h-20;
-    background: linear-gradient(to bottom right, transparent 49.5%, #0a0a0a 50%);
+    @apply pointer-events-none absolute size-4 border-racing-yellow;
+  }
+  .hud-corners::before {
+    @apply left-0 top-0 border-l border-t;
+  }
+  .hud-corners::after {
+    @apply bottom-0 right-0 border-b border-r;
   }
 
-  /* Glow effects */
-  .glow-red {
-    box-shadow: 0 0 40px rgba(247, 214, 25, 0.15), 0 0 80px rgba(247, 214, 25, 0.05);
+  /*
+   * The admin has no shared classes here at all: every one of its surfaces and
+   * controls is a component under src/admin/ui/. Adding one to this file would
+   * give the same button two places to be changed.
+   */
+}
+
+/*
+ * A cropped banner, panned across on a phone.
+ *
+ * A banner photograph is wide and a phone is tall, so filling that box means
+ * cutting most of the picture away — on a 390px screen roughly a third of it
+ * survives, and which third is a guess made in the admin on a desktop. The
+ * seven cars in a category line-up become two cars.
+ *
+ * So on a narrow screen a cropped banner travels: it starts at one edge of the
+ * picture and moves to the other, and everything that was cut off is seen
+ * before the banner hands over. `alternate` sends it back again for a page with
+ * only one banner, which does not rotate and would otherwise stop at the far
+ * edge and sit there.
+ *
+ * Only below `md`, and only where the picture is being cropped at all. That
+ * includes Fit at these widths: it shows the whole picture on a wide screen,
+ * but on a phone it fills the height and runs off both sides, so it has the
+ * same off-frame picture to travel across. Stretch never pans — it distorts to
+ * fill and cuts nothing, so there is nothing to travel to.
+ *
+ * `object-position` rather than a transform: it moves the picture INSIDE its
+ * box, so nothing overflows and no parent needs to know the image's
+ * proportions. It is the one property that means "show a different part of
+ * this" without anything else on the page having to move.
+ *
+ * The vertical half is held at whatever the banner's own focus asks for, so a
+ * photo pinned to the top pans along its top edge rather than drifting back to
+ * the middle.
+ */
+@keyframes banner-pan {
+  from {
+    object-position: 0% var(--banner-pan-y, 50%);
   }
-
-  .glow-red-strong {
-    box-shadow: 0 0 60px rgba(247, 214, 25, 0.25), 0 0 120px rgba(247, 214, 25, 0.1);
-  }
-
-  /* Noise overlay */
-  .noise-overlay::before {
-    content: "";
-    @apply absolute inset-0 pointer-events-none opacity-[0.03];
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  to {
+    object-position: 100% var(--banner-pan-y, 50%);
   }
 }
 
-/* ─── Custom Animations ─── */
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+@media (max-width: 767px) {
+  .banner-pan {
+    animation: banner-pan var(--banner-pan-duration, 6500ms) ease-in-out infinite alternate;
+  }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes revealLine {
-  0% { transform: scaleX(0); }
-  100% { transform: scaleX(1); }
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-marquee {
-  animation: marquee 22s linear infinite;
+/* Respect reduced motion — kill the looping motifs. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-float,
+  .animate-marquee,
+  .animate-marquee-slow,
+  .animate-marquee-reverse,
+  .animate-scan,
+  .animate-spin-slow,
+  .banner-pan {
+    animation: none !important;
+  }
 }

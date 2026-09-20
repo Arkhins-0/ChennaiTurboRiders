@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "project": {
+    "name": "ctr-formula4",
+    "productType": "marketing-site",
+    "stack": [
+      "nextjs",
+      "react",
+      "tailwind-v3"
+    ]
+  },
+  "sources": {
+    "tokens": [
+      "tailwind.config.ts",
+      "src/styles/globals.css"
+    ],
+    "components": [
+      "src/components/site",
+      "src/components/ui"
+    ],
+    "assets": [
+      "public/images"
+    ],
+    "instructions": [
+      "README.md"
+    ]
+  },
+  "design": {
+    "colorMode": "dark",
+    "colors": {
+      "page": "#000000",
+      "surface": "#0A0A0A (carbon-950)",
+      "accent": "#F7D619 (racing-yellow)",
+      "ink": "#0A0A0A",
+      "text": "#FFFFFF / carbon-100..400",
+      "line": "rgb(255 255 255 / 0.10)"
+    },
+    "typography": {
+      "display": "Rajdhani (--font-display) via .heading-font, uppercase, tight leading",
+      "body": "Inter (--font-body)",
+      "labels": "11px uppercase tracking 0.25-0.3em",
+      "mono": "JetBrains Mono (--font-mono) via .readout: 11px uppercase tracking 0.18em"
+    },
+    "spacing": {},
+    "radius": {
+      "default": "0 (square) on the public site; rounded only for avatars"
+    },
+    "shadows": {},
+    "motion": {
+      "reveal": "framer-motion whileInView fade-up, honours prefers-reduced-motion",
+      "hero": "word-by-word wipe-in, parallax drift on scroll, animated counters",
+      "reel": "pinned horizontal scroll (DriverReel) on >=1024px, snap-scroll row otherwise",
+      "marquee": "CSS marquee keyframes (TextMarquee) + rAF LogoMarquee",
+      "cards": "pointer tilt (TiltCard), grayscale-to-colour photography",
+      "ambient": "pointer spotlight (fine pointers only), scanline sweep, grain"
+    },
+    "density": "airy"
+  },
+  "components": {
+    "installed": [
+      "Navbar",
+      "Spotlight",
+      "Footer",
+      "Hero",
+      "TextMarquee",
+      "PageHeader",
+      "SectionHeading",
+      "Reveal",
+      "Counter",
+      "CountdownTimer",
+      "TiltCard",
+      "DriverPoster",
+      "DriverReel",
+      "NewsCard",
+      "FeaturedNews",
+      "LogoMarquee"
+    ],
+    "preferredPrimitives": [],
+    "patterns": [
+      "hud-corners bracket frames",
+      "readout mono labels",
+      "gap-px grids on bg-white/10",
+      "leaning (skewX -8deg) display headlines with one outlined word",
+      "grain + scanlines over video/photography"
+    ]
+  },
+  "constraints": {
+    "must": [
+      "Site palette (page/surface/accent, racing-yellow/carbon-*) never mixes with the admin palette (background/card/muted/primary)",
+      "Plain <img>, not next/image (see next.config.js)",
+      "Public site reads drivers/sponsors/about/car from src/data/site-data.json; articles and calendar from the database"
+    ],
+    "avoid": [
+      "Rounded cards with borders as the default container",
+      "Decorative gradients beyond photo washes",
+      "Shadows on dark surfaces"
+    ]
+  },
+  "decisions": [
+    {
+      "date": "2026-09-06",
+      "title": "Pit-wall editorial redesign",
+      "summary": "Full-bleed photography, oversized Rajdhani headlines, square hairline layouts, racing-yellow as the only colour. Grounded in 21st.dev: Logo Marquee (ddoemonn, #23537) and Team Showcase (makviesainte, #10098) adapted into project tokens as LogoMarquee and DriverShowcase."
+    },
+    {
+      "date": "2026-09-06",
+      "title": "Broadcast / onboard-feed redesign (supersedes pit-wall editorial)",
+      "summary": "Full-strength hero video under scanlines and grain, HUD corner readouts in JetBrains Mono, glass pill navigation with lap-timer progress bar, pinned horizontal driver reel, tilting news cards, split-flap countdown, pointer spotlight. Yellow on carbon remains the only palette."
+    }
+  ],
+  "evidence": [
+    {
+      "fact": "components.installed",
+      "source": "src/components/ui"
+    },
+    {
+      "fact": "project.stack:nextjs",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:react",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:tailwind-v3",
+      "source": "package.json"
+    }
+  ],
+  "generatedAt": "2026-09-06T16:41:47.646Z"
+}

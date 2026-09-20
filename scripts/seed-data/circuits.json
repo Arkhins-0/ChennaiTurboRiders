@@ -1,0 +1,83 @@
+[
+  {
+    "name": "Kari Motor Speedway",
+    "slug": "kari-motor-speedway",
+    "location": "Chettipalayam, Coimbatore, Tamil Nadu",
+    "photo_url": "https://raw.githubusercontent.com/Krishna-Vijay-G/CTRSports/refs/heads/assets/circuits/circuit1.webp",
+    "map_url": "https://raw.githubusercontent.com/Krishna-Vijay-G/CTRSports/refs/heads/assets/circuits/map1.webp",
+    "length": "2.10 km",
+    "turns": "15",
+    "direction": "Clockwise",
+    "opened": "2003",
+    "broke_ground": "2002",
+    "former_names": "",
+    "owner": "B. Vijay Kumar (LG Sports)",
+    "fia_grade": "3",
+    "coordinates": "10°54′5″N 77°3′3″E",
+    "links": [
+      {
+        "label": "Official site",
+        "href": "https://lgsports.co.in"
+      }
+    ],
+    "major_events": "Indian Racing League\nF4 India\nJK Tyre National Racing Championship\nFormula LGB 1300 / LGB 4\nIndian National Motorcycle Racing Championship",
+    "lap_record_time": "1:03.296",
+    "lap_record_year": "2024",
+    "note": "A technical, tight circuit named in memory of legendary Indian racer and constructor S. Karivardhan.",
+    "sort_order": 10
+  },
+  {
+    "name": "Bren Raceway",
+    "slug": "bren-raceway",
+    "location": "Doddaballapur, Bengaluru, Karnataka",
+    "photo_url": "https://raw.githubusercontent.com/Krishna-Vijay-G/CTRSports/refs/heads/assets/circuits/circuit2.webp",
+    "map_url": "https://raw.githubusercontent.com/Krishna-Vijay-G/CTRSports/refs/heads/assets/circuits/map2.webp",
+    "length": "4.10 km",
+    "turns": "14",
+    "direction": "Clockwise",
+    "opened": "2024",
+    "broke_ground": "2022",
+    "former_names": "",
+    "owner": "Boopesh Reddy (Bren Garage)",
+    "fia_grade": "2",
+    "coordinates": "13°22′38″N 77°30′55″E",
+    "links": [
+      {
+        "label": "Official site",
+        "href": "https://brengarage.com"
+      }
+    ],
+    "major_events": "Track Days\nSupercar Experience\nPrivate Testing\nMotorsport Training & Driver Development",
+    "lap_record_time": "",
+    "lap_record_year": "",
+    "note": "FIA Grade 2 specification private racetrack designed for testing, performance driving, and exclusive motorsport events.",
+    "sort_order": 20
+  },
+  {
+    "name": "Madras International Circuit",
+    "slug": "madras-international-circuit",
+    "location": "Irungattukottai, Chennai",
+    "photo_url": "https://raw.githubusercontent.com/Krishna-Vijay-G/CTRSports/refs/heads/assets/circuits/circuit3.webp",
+    "map_url": "https://raw.githubusercontent.com/Krishna-Vijay-G/CTRSports/refs/heads/assets/circuits/map3.webp",
+    "length": "3.71 km",
+    "turns": "12",
+    "direction": "Clockwise",
+    "opened": "1990",
+    "broke_ground": "1988",
+    "former_names": "Madras Motor Race Track; Irungattukottai Race Track",
+    "owner": "Madras Motor Sports Club",
+    "fia_grade": "2",
+    "coordinates": "13°0′9″N 79°59′9″E",
+    "links": [
+      {
+        "label": "Official site",
+        "href": "https://en.madrasmotorsports.com"
+      }
+    ],
+    "major_events": "MRF Formula 2000\nIndian Racing League\nF4 India\nF4 SEA\nAsia Road Racing Championship\nAsian F3",
+    "lap_record_time": "1:30.323",
+    "lap_record_year": "2020",
+    "note": "A long back straight into a hairpin — the season's decider.",
+    "sort_order": 30
+  }
+]

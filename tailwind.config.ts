@@ -1,81 +1,142 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Dark, card-led palette.
+ *
+ * The layout is the same one the design reference uses — a page colour showing
+ * around one big rounded card — but inverted: the page is near-black and the
+ * card sits a shade above it. Depth comes from those two steps plus `panel` for
+ * anything nested inside the card, never from shadows, which do not read on a
+ * dark background.
+ *
+ * `accent` is the one bright colour, and it carries every primary button, badge
+ * and the call-to-action band. `accent-ink` is the only thing that may sit ON
+ * accent — near-black, because yellow needs dark type over it.
+ *
+ * The second block of colours is the ADMIN's, and it is a different design
+ * altogether: a monochrome tool palette in the manner of Reactive Resume, where
+ * depth is one step of grey at a time and the absence of colour is the point.
+ * Two exceptions, both meaningful: `primary` is CTR's yellow so the one action
+ * that writes to the database is unmistakable, and `destructive` is red.
+ *
+ * The two sets never mix. Site components use page/surface/panel/accent; admin
+ * components use background/card/muted/primary. Anything using both would look
+ * like neither.
+ */
 const config: Config = {
-  content: [
-    "./src/**/*.{ts,tsx}",
-  ],
+  content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        racing: {
-          yellow: "#F7D619",
-          "yellow-dark": "#D4BB0A",
-          "yellow-glow": "rgba(247, 214, 25, 0.3)",
+        accent: {
+          DEFAULT: "#F7D619",
+          dark: "#E0BF06",
+          ink: "#0A0A0A",
+        },
+        // Surfaces, darkest first. The steps between them are deliberately
+        // wide: on a dark page a 2-3% difference reads as one flat expanse, so
+        // each level is far enough apart to be told apart at a glance.
+        page: "#000000",
+        surface: "#0C0E11",
+        panel: "#1B2027",
+        line: "#39414D",
+        // Type. `muted` and `faint` are both well clear of the 4.5:1 floor
+        // against `panel`, which is the darkest thing they ever sit on.
+        fg: {
+          DEFAULT: "#FFFFFF",
+          muted: "#C2C9D4",
+          faint: "#98A1AF",
+        },
+
+        /* ─────────────────────────── Admin only ───────────────────────────
+           Warm achromatic greys, one step apart. Elevation is a lighter grey,
+           never a shadow; separation is a 10%-white hairline, which sits on any
+           of these surfaces without banding the way a solid grey would. */
+        background: "#212121",
+        foreground: "#FBFBFB",
+        card: { DEFAULT: "#2C2C2C", fg: "#FBFBFB" },
+        // Hover states, inactive tabs, and anything deliberately receding.
+        muted: { DEFAULT: "#3C3C3C", fg: "#ADADAD" },
+        // The one bright colour in the admin: the action that writes.
+        primary: { DEFAULT: "#F7D619", fg: "#1A1A1A" },
+        secondary: { DEFAULT: "#3C3C3C", fg: "#FBFBFB" },
+        destructive: "#F0605F",
+        border: "rgb(255 255 255 / 0.10)",
+        input: "rgb(255 255 255 / 0.16)",
+        ring: "#8E8E8E",
+        /* ──────────────────────── Chennai Turbo Riders ────────────────────
+           The F4 site's own palette: racing yellow on carbon black. It
+           overlaps `accent` by value and not by name on purpose — the site
+           components name the brand, the shared components name the role, and
+           renaming either would mean editing the other. */
+        "racing-yellow": {
+          DEFAULT: "#F7D619",
+          dark: "#D4BB0A",
         },
         carbon: {
-          950: "#0A0A0A",
-          900: "#111111",
-          800: "#1A1A1A",
-          700: "#222222",
-          600: "#2D2D2D",
+          100: "#F5F5F5",
+          200: "#E5E5E5",
+          300: "#8A8F99",
+          400: "#5C616B",
           500: "#404040",
-          400: "#555555",
-          300: "#777777",
+          600: "#2D2D2D",
+          700: "#222222",
+          800: "#161616",
+          900: "#0E0E0E",
+          950: "#070707",
         },
         metal: {
-          light: "#C0C0C0",
           DEFAULT: "#8A8A8A",
-          dark: "#5A5A5A",
+          light: "#C0C0C0",
         },
       },
       fontFamily: {
-        heading: ["Rajdhani", "Oswald", "sans-serif"],
-        body: ["Inter", "system-ui", "sans-serif"],
+        // Supplied by next/font in src/app/layout.tsx.
+        // `display` is Rajdhani — the site's headline face.
+        display: ["var(--font-display)", "Oswald", "system-ui", "sans-serif"],
+        body: ["var(--font-body)", "system-ui", "sans-serif"],
+        // The site's data face: readouts, labels, timestamps — the broadcast
+        // graphics of a race weekend.
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        // The admin's only face. A different family from the site's on purpose:
+        // the tool should never read as part of the thing it edits.
+        ui: ["var(--font-ui)", "system-ui", "sans-serif"],
+      },
+      borderRadius: {
+        card: "28px",
+        panel: "22px",
       },
       animation: {
-        "fade-in": "fadeIn 0.6s ease-out forwards",
-        "fade-up": "fadeUp 0.7s ease-out forwards",
-        "slide-in-left": "slideInLeft 0.6s ease-out forwards",
-        "slide-in-right": "slideInRight 0.6s ease-out forwards",
-        "pulse-glow": "pulseGlow 2s ease-in-out infinite",
-        "count-up": "countUp 2s ease-out forwards",
-        "line-expand": "lineExpand 0.8s ease-out forwards",
+        float: "float 4s ease-in-out infinite",
+        // The strip renders its items twice, so travelling exactly half the
+        // track puts the copy back where the original started — seamless.
+        marquee: "marquee 34s linear infinite",
+        "marquee-slow": "marquee 60s linear infinite",
+        "marquee-reverse": "marquee-reverse 60s linear infinite",
+        blink: "blink 1.6s steps(2, start) infinite",
+        scan: "scan 9s linear infinite",
+        "spin-slow": "spin 14s linear infinite",
       },
       keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-12px)" },
         },
-        fadeUp: {
-          "0%": { opacity: "0", transform: "translateY(40px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
         },
-        slideInLeft: {
-          "0%": { opacity: "0", transform: "translateX(-60px)" },
-          "100%": { opacity: "1", transform: "translateX(0)" },
+        "marquee-reverse": {
+          from: { transform: "translateX(-50%)" },
+          to: { transform: "translateX(0)" },
         },
-        slideInRight: {
-          "0%": { opacity: "0", transform: "translateX(60px)" },
-          "100%": { opacity: "1", transform: "translateX(0)" },
+        blink: {
+          to: { visibility: "hidden" },
         },
-        pulseGlow: {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(247, 214, 25, 0.2)" },
-          "50%": { boxShadow: "0 0 40px rgba(247, 214, 25, 0.4)" },
+        scan: {
+          from: { transform: "translateY(-100%)" },
+          to: { transform: "translateY(100vh)" },
         },
-        countUp: {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        lineExpand: {
-          "0%": { width: "0%" },
-          "100%": { width: "100%" },
-        },
-      },
-      backgroundImage: {
-        "carbon-fiber":
-          "repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px)",
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "red-gradient": "linear-gradient(135deg, #F7D619 0%, #D4BB0A 100%)",
       },
     },
   },
