@@ -80,7 +80,7 @@ something that looks like none of them:
 | Set | Used by | Names |
 |---|---|---|
 | Site (brand) | `components/site/*`, the F4 pages | `racing-yellow`, `carbon-*`, `metal` |
-| Site (shared) | `_shell/*`, ported sections | `accent`, `page`, `surface`, `panel`, `line`, `fg-*` |
+| Site (shared) | the console's article and event previews | `accent`, `page`, `surface`, `panel`, `line`, `fg-*` |
 | Console | `admin/*` | `background`, `card`, `muted`, `primary`, `border`, `ring` |
 
 The console also has a typeface of its own (`font-ui`, IBM Plex Sans) so the tool
@@ -90,21 +90,25 @@ never reads as part of the thing it edits.
 
 ## What the console drives, and what it does not
 
-Wired to the database:
+Every screen edits something the site draws, and every page of the site reads
+the database. There is no static content file.
 
 | Screen | Public page |
 |---|---|
-| Articles | `/news`, `/news/[slug]`, and the home page's latest-news band |
+| Team & site | the masthead, the footer, the hero and about bands on `/`, `/about`, the car panel, the timeline |
+| Drivers | `/drivers`, `/drivers/[slug]`, and the reel on the home page |
+| Sponsors | `/sponsors` and the logo marquee on the home page |
 | Season · rounds | `/schedule` — the calendar, the next-race panel and its countdown |
-| Circuits | the circuit block on `/schedule` |
-| Decks, Registration forms, Media, Enquiries, Accounts | console-side, plus the shared routes |
+| Circuits | the venue on each round of `/schedule` |
+| Articles | `/news`, `/news/[slug]`, and the home page's latest-news band |
+| Media, Accounts, Co-admins | console-side |
 
-**Still reading `src/data/site-data.json`:** the drivers, the sponsors, the about
-band, the car specification and the hero copy. Those have no equivalent table in
-the ported schema — a driver is not an article — so they were left working as
-they were rather than half-migrated. Giving them tables is the next piece of
-work, and it is a migration plus a repo plus a screen each, following `articles`
-as the model.
+The console arrived as a port of CTR Unified's, and for a while it carried
+that platform's screens too — a section-built landing page and its header and
+footer, sports cards, decks, registration forms, enquiries — editing content
+this site never rendered. `0025_ctr_shape.sql` removed all of it, along with
+the unrouted page components under `_shell/` that would have drawn it. The
+console is now the shape of the site.
 
 ### Two columns this deployment added
 
@@ -132,7 +136,7 @@ npm run db:seed        # starting rows; each kind only fires on its own empty ta
 npm run create-admin -- <username> <password>
 
 npx tsc --noEmit
-npm run check:source && npm run check:forms && npm run check:decks && npm run check:articles
+npm run check:source && npm run check:articles
 npm run build          # reads the database, so DATABASE_URL must be reachable
 ```
 
@@ -153,7 +157,6 @@ short version:
 | `DATABASE_URL` | Neon Postgres. Every table is in the `ctr` schema. |
 | `S3_*` | the media bucket. Unset, image fields still take pasted URLs. |
 | `NEXT_PUBLIC_MEDIA_BASE_URL` | the CDN in front of the bucket. Inlined at **build** time, so changing it needs a redeploy. |
-| `REGISTER_SECRET` | signs entry forms. Optional; unset turns one timing check off and says so. |
 
 No domain is written down in the source. `SITE_URL` and `ADMIN_HOSTS` are the
 only place this deployment learns its own name.

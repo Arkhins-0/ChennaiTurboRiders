@@ -2,7 +2,7 @@ import "server-only";
 
 import { revalidatePath } from "next/cache";
 import { articleHref, articlesHref } from "@/lib/articles";
-import { type SiteRef } from "@/lib/sites";
+import { siteHref, type SiteRef } from "@/lib/sites";
 
 /**
  * The pages that draw an article, cleared after one changes.
@@ -18,7 +18,9 @@ import { type SiteRef } from "@/lib/sites";
  * Both are the SITE's paths. See the note in revalidateDecks.ts.
  */
 export function revalidateArticlePages(site: SiteRef, slugs: readonly string[] = []): void {
+  revalidatePath(siteHref(site) || "/"); // the latest-news band on the home page
   revalidatePath(articlesHref(site));
+  revalidatePath("/sitemap.xml");
 
   for (const slug of new Set(slugs)) {
     if (slug) revalidatePath(articleHref(site, { slug }));

@@ -9,7 +9,6 @@ import {
 } from "@/lib/events";
 import { eventDateLabel } from "@/lib/raceDates";
 import type { RichDoc } from "@/lib/richtext";
-import type { FormSummary } from "@/lib/forms";
 import type { SlugHolder } from "@/lib/slug";
 import type { Track } from "@/lib/tracks";
 import { Button } from "@/admin/ui/Button";
@@ -35,7 +34,6 @@ import { RichText } from "@/admin/components/richtext/RichText";
 export function EventForm({
   event,
   tracks,
-  forms,
   siteUrl,
   onChange,
   onDelete,
@@ -45,8 +43,6 @@ export function EventForm({
   event: CtrEvent;
   /** This sport's circuits, for the picker. Fetched by the screen, never here. */
   tracks: Track[];
-  /** This sport's entry forms, published and not. */
-  forms: FormSummary[];
   /**
    * Where the public site answers. The admin is on a different hostname, so a
    * relative link to an event from here would resolve against the admin host.
@@ -140,13 +136,13 @@ export function EventForm({
 
           {event.status === "published" && event.slug ? (
             <a
-              href={`${siteUrl}/calendar/${event.slug}`}
+              href={`${siteUrl}/schedule`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-muted-fg underline underline-offset-2 transition-colors hover:text-foreground"
             >
               <ExternalIcon className="size-3.5" />
-              Open /calendar/{event.slug}
+              Open /schedule
             </a>
           ) : null}
         </div>
@@ -239,29 +235,6 @@ export function EventForm({
         </div>
       </Panel>
 
-      <Panel title="Entries">
-        <div className="block">
-          <Label>Entry form</Label>
-          <Select
-            value={event.form_id}
-            onChange={(e) => set({ form_id: e.target.value })}
-            disabled={busy}
-            className="mt-1.5 w-full"
-          >
-            <option value="">— none —</option>
-            {forms.map((form) => (
-              <option key={form.id} value={form.id}>
-                {form.name}
-              </option>
-            ))}
-          </Select>
-          <Hint className="mt-1">
-            {forms.length === 0
-              ? "No entry forms for this sport yet — add one on the Registrations screen."
-              : "The button on the event's page. It only appears while the form is actually taking entries, so a closed one leaves no dead link behind."}
-          </Hint>
-        </div>
-      </Panel>
 
       <Panel title="Cover">
         <ImageField

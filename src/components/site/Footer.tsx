@@ -2,14 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 import { TextMarquee } from "@/components/site/TextMarquee";
-import { contact, site, socialMedia } from "@/data/site-data";
-
-const socials = [
-  { href: socialMedia.instagram, name: "instagram", label: "Instagram" },
-  { href: socialMedia.facebook, name: "facebook", label: "Facebook" },
-  { href: socialMedia.twitter, name: "twitter", label: "X" },
-  { href: socialMedia.youtube, name: "youtube", label: "YouTube" },
-] as const;
+import { siteTeam } from "@/lib/server/siteContent";
 
 const nav = [
   { href: "/about", label: "Team" },
@@ -26,8 +19,28 @@ const nav = [
  * and the name, then the practical columns, then a mono status strip along
  * the bottom edge — the last line of a broadcast, all systems go.
  */
-export function Footer() {
+export async function Footer() {
+  const { site, contact, socialMedia } = await siteTeam();
   const year = new Date().getFullYear();
+
+  /*
+   * Built here rather than at module scope, which is where it used to be:
+   * the four addresses are rows now, so there is nothing to read until the
+   * request has one.
+   *
+   * A blank address is dropped rather than rendered as `href=""`, which is a
+   * link back to the current page wearing a social icon. That is what makes an
+   * empty column in the console mean “we are not on X” — see the note on the
+   * social columns in migration 0024.
+   */
+  const socials = (
+    [
+      { href: socialMedia.instagram, name: "instagram", label: "Instagram" },
+      { href: socialMedia.facebook, name: "facebook", label: "Facebook" },
+      { href: socialMedia.twitter, name: "twitter", label: "X" },
+      { href: socialMedia.youtube, name: "youtube", label: "YouTube" },
+    ] as const
+  ).filter((s) => s.href);
 
   return (
     <footer className="relative overflow-hidden border-t border-white/10 bg-carbon-950">

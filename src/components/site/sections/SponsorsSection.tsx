@@ -1,17 +1,27 @@
 import { LogoMarquee } from "@/components/site/LogoMarquee";
 import { Reveal } from "@/components/site/Reveal";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { sponsors } from "@/data/site-data";
+import { siteSponsors } from "@/lib/server/siteContent";
 import type { Sponsor } from "@/types/site";
 
-const tiers: { label: string; items: Sponsor[] }[] = [
-  { label: "Title Partner", items: sponsors.title },
-  { label: "Principal Partner", items: sponsors.principal },
-  { label: "Official Partners", items: sponsors.official },
-];
+export async function SponsorsSection() {
+  const sponsors = await siteSponsors();
 
-export function SponsorsSection() {
+  /*
+   * The marquee shows the three top tiers and not `technical`, which is the
+   * set this band has always drawn. The full four are on /sponsors.
+   */
+  const tiers: { label: string; items: Sponsor[] }[] = [
+    { label: "Title Partner", items: sponsors.title },
+    { label: "Principal Partner", items: sponsors.principal },
+    { label: "Official Partners", items: sponsors.official },
+  ];
+
   const all = tiers.flatMap((tier) => tier.items);
+
+  // No partners yet: a marquee of nothing scrolls an empty strip forever.
+  if (all.length === 0) return null;
+
   const items = all.map((s) => ({ id: s.id, label: s.name, href: s.website, logo: s.logo }));
 
   return (

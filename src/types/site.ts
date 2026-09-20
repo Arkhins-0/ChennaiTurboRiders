@@ -1,5 +1,31 @@
-/* ── Types ── */
+/**
+ * The shapes the public site renders.
+ *
+ * These were the shape of src/data/site-data.json, which every component read
+ * directly. The file is gone — migration 0024 moved its contents into the
+ * database — and the types stayed, because they are what the components want
+ * and the repos in src/lib/server now hand back exactly this.
+ *
+ * ── Why the repos return these and not the rows ───────────────────────────
+ *
+ * A row is flat and snake_cased: `hero_title`, `contact_email`,
+ * `principal_name`. The components want `hero.title` and `contact.email`,
+ * because that is how the design groups them — a footer takes the contact
+ * block, the navigation takes the social links, and neither has any use for the
+ * other twenty columns. The repo does that regrouping once, in one place, so
+ * fourteen components are not each reaching into a wide row for the three
+ * fields they want.
+ *
+ * It also meant the migration off the file changed the IMPORT in each of those
+ * components and nothing else: the value they destructure is the same shape it
+ * always was.
+ *
+ * Shared by the server and the browser — the driver reel and the navigation are
+ * client components and take these as props — so nothing here may import
+ * `server-only`.
+ */
 
+/** The team, as it is written. `ctr.team_profile`'s identity columns. */
 export interface SiteConfig {
   name: string;
   abbreviation: string;
@@ -12,12 +38,18 @@ export interface SiteConfig {
   officialWebsite: string;
 }
 
+/** A counter: a short value with a label under it. Four under the hero, four beside the about copy. */
+export interface TeamStat {
+  value: string;
+  label: string;
+}
+
 export interface HeroData {
   title: string;
   subtitle: string;
   description: string;
   videoSrc: string;
-  stats: { value: string; label: string }[];
+  stats: TeamStat[];
 }
 
 export interface AboutData {
@@ -26,7 +58,7 @@ export interface AboutData {
   description: string;
   description2: string;
   image: string;
-  stats: { value: string; label: string }[];
+  stats: TeamStat[];
 }
 
 export interface TeamPrincipal {
@@ -47,6 +79,22 @@ export interface Contact {
   phone: string;
   address: string;
   mapEmbed?: string;
+}
+
+/**
+ * Everything one read of `ctr.team_profile` and `ctr.team_stats` produces.
+ *
+ * One type because it is one query. The site's layout needs `site`, `contact`
+ * and `socialMedia` on every page, and splitting those into three repo calls
+ * would be three round trips to draw a header that has always been one row.
+ */
+export interface TeamContent {
+  site: SiteConfig;
+  hero: HeroData;
+  about: AboutData;
+  teamPrincipal: TeamPrincipal;
+  socialMedia: SocialMedia;
+  contact: Contact;
 }
 
 export interface CarSpec {
@@ -74,8 +122,17 @@ export interface DriverStats {
   points: number;
 }
 
+/**
+ * One driver.
+ *
+ * `id` is the row's uuid — what the console PUTs to — and `slug` is the address
+ * at /drivers/<slug>. The JSON had one field doing both jobs, which meant an
+ * address could not be corrected without every reference to the driver moving
+ * with it. See the note on ctr.drivers in migration 0024.
+ */
 export interface Driver {
   id: string;
+  slug: string;
   firstName: string;
   lastName: string;
   nationality: string;
@@ -96,51 +153,27 @@ export interface Driver {
 }
 
 export interface Achievement {
+  id: string;
   year: string;
   title: string;
   description: string;
 }
 
-export interface GalleryItem {
-  src: string;
-  alt: string;
-  category: string;
-}
+/** Which band of the sponsors page a partner is shown in. `ctr.sponsors.tier`. */
+export const SPONSOR_TIERS = ["title", "principal", "official", "technical"] as const;
+export type SponsorTier = (typeof SPONSOR_TIERS)[number];
 
-export interface Race {
-  round: number;
-  name: string;
-  location: string;
-  country: string;
-  flagEmoji: string;
-  dateStart: string;
-  dateEnd: string;
-  circuitLength: string;
-  laps: number;
-  isNightRace: boolean;
-  isStreetCircuit: boolean;
-  description?: string;
-}
-
-export interface StreetCircuit {
-  name: string;
-  length: string;
-  capacity: number;
-  stands: number;
-  image?: string;
-  route: string[];
-  features: string[];
-}
-
-export interface RacesData {
-  season: number;
-  seasonName: string;
-  calendar: Race[];
-  streetCircuit: StreetCircuit;
-}
+export const SPONSOR_TIER_LABELS: Record<SponsorTier, string> = {
+  title: "Title sponsor",
+  principal: "Principal partner",
+  official: "Official partner",
+  technical: "Technical partner",
+};
 
 export interface Sponsor {
   id: string;
+  slug: string;
+  tier: SponsorTier;
   name: string;
   logo: string;
   fullLogo?: string;
@@ -148,40 +181,12 @@ export interface Sponsor {
   description?: string;
 }
 
-export interface SponsorsData {
-  title: Sponsor[];
-  principal: Sponsor[];
-  official: Sponsor[];
-  technical: Sponsor[];
-}
-
-export interface NewsArticle {
-  image1: string | undefined;
-  id: string;
-  title: string;
-  slug: string;
-  publishDate: string;
-  category: string;
-  image: string;
-  excerpt: string;
-  author: string;
-  content: string;
-  tags: string[];
-  instagramUrl?: string;
-}
-
-export interface SiteData {
-  site: SiteConfig;
-  hero: HeroData;
-  about: AboutData;
-  teamPrincipal: TeamPrincipal;
-  socialMedia: SocialMedia;
-  contact: Contact;
-  carSpecs: CarSpecs;
-  drivers: Driver[];
-  achievements: Achievement[];
-  gallery: GalleryItem[];
-  races: RacesData;
-  sponsors: SponsorsData;
-  news: NewsArticle[];
-}
+/**
+ * The sponsors, grouped by tier.
+ *
+ * The rows come back as one ordered list and are grouped here rather than in
+ * four queries, because the page draws all four bands and a tier with nothing
+ * in it is an empty array rather than a missing key — which is what lets the
+ * components map over it without checking first.
+ */
+export type SponsorsData = Record<SponsorTier, Sponsor[]>;

@@ -149,11 +149,8 @@ function adminHost(request: NextRequest, pathname: string) {
 
 function publicHost(pathname: string) {
   // The admin's API is part of the admin. Absent here, like the screens.
-  //
-  // Everything else passes, and that now includes one route that takes a write
-  // from a stranger: /api/register/[slug], which is where an entry form posts.
-  // It is deliberately public — see the checks at the top of that file, which
-  // are what stands in for the session guard the admin routes have.
+  // Everything else passes. No public route takes a write any more: the
+  // registration forms and the footer's enquiry box went with migration 0025.
   return pathname.startsWith("/api/admin") ? notFound() : NextResponse.next();
 }
 

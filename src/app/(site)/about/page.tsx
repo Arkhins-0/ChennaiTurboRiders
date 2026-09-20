@@ -3,14 +3,27 @@ import { Counter } from "@/components/site/Counter";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { about, achievements, site, teamPrincipal } from "@/data/site-data";
+import { siteAchievements, siteTeam } from "@/lib/server/siteContent";
 
-export const metadata: Metadata = {
-  title: "The Team",
-  description: about.description,
-};
+/*
+ * `generateMetadata` rather than a `metadata` constant.
+ *
+ * The description is the team's own copy, which is a row now — and a module
+ * constant is evaluated when the module is first imported, which is before
+ * there is a request to read one for. Next's answer to that is this function,
+ * and `siteTeam` is memoised, so it is not a second query.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { about } = await siteTeam();
+  return { title: "The Team", description: about.description };
+}
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [{ about, site, teamPrincipal }, achievements] = await Promise.all([
+    siteTeam(),
+    siteAchievements(),
+  ]);
+
   return (
     <>
       <PageHeader
@@ -97,7 +110,7 @@ export default function AboutPage() {
         <ol className="mt-14 grid gap-px border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4">
           {[...achievements].reverse().map((a, i) => (
             <Reveal
-              key={a.year}
+              key={a.id}
               as="li"
               delay={i * 0.06}
               className="group flex flex-col bg-carbon-950 p-6 md:min-h-[280px]"

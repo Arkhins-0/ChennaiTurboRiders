@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { ArticleBody } from "@/app/(site)/_shell/articles/ArticleBody";
+import { ArticleBody } from "@/components/site/articles/ArticleBody";
 import { NewsCard, newsCardFrom } from "@/components/site/NewsCard";
-import { site as team } from "@/data/site-data";
 import { formatDate } from "@/lib/format";
 import { getArticleBySlug, listPublishedArticles } from "@/lib/server/articlesRepo";
+import { siteTeam } from "@/lib/server/siteContent";
 import { getRootSite } from "@/lib/server/sitesRepo";
 
 export async function generateStaticParams() {
@@ -39,6 +39,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   // A former address still finds the piece; correct the address bar rather
   // than serving the article at two URLs.
   if (article.slug !== slug) permanentRedirect(`/news/${article.slug}`);
+
+  // The team's initials, for the breadcrumb over the headline. Named `team`
+  // because `site` above is the routing row, and the two are different things.
+  const { site: team } = await siteTeam();
 
   const related = (await listPublishedArticles(site.id))
     .filter((entry) => entry.slug !== article.slug)

@@ -26,14 +26,14 @@ import { useSite } from "@/admin/components/SiteScope";
 
 /**
  * The route each kind publishes under. The SPORT in front of it comes from the
- * surrounding scope — an address is `/incrc/deck/<slug>`, and this component is
+ * surrounding scope — an address is `/news/<slug>`, and this component is
  * used on every sport's screens.
  */
 const ROUTE: Record<SlugKind, string> = {
-  form: "register",
-  deck: "deck",
-  article: "articles",
-  event: "calendar",
+  article: "news",
+  // A round has no page of its own on this site; its address is where it is
+  // listed. See `eventHref` in src/lib/events.ts.
+  event: "schedule",
 };
 
 export function FormerSlugs({

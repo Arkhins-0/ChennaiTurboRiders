@@ -163,35 +163,6 @@ export const NewsIcon = (p: IconProps) => (
   </Icon>
 );
 
-export const TicketIcon = (p: IconProps) => (
-  <Icon {...p}>
-    <path d="M3 7.4V5.8a1.2 1.2 0 0 1 1.2-1.2h11.6A1.2 1.2 0 0 1 17 5.8v1.6a2.6 2.6 0 0 0 0 5.2v1.6a1.2 1.2 0 0 1-1.2 1.2H4.2A1.2 1.2 0 0 1 3 14.2v-1.6a2.6 2.6 0 0 0 0-5.2Z" />
-    <path d="M11.4 4.6v10.8" />
-  </Icon>
-);
-
-/**
- * The enquiries — an envelope.
- *
- * The same drawing as `MailGlyph` in SiteFooter.tsx, redrawn on the 20px grid
- * these use rather than the 24px one the site's own glyphs are on.
- */
-export const MailIcon = (p: IconProps) => (
-  <Icon {...p}>
-    <rect x="2.5" y="4.6" width="15" height="10.8" rx="2" />
-    <path d="m3.2 5.9 5.9 4.3a1.6 1.6 0 0 0 1.8 0l5.9-4.3" />
-  </Icon>
-);
-
-/** The running order — a stack whose top card is being moved. */
-export const StackIcon = (p: IconProps) => (
-  <Icon {...p}>
-    <rect x="2.8" y="2.8" width="14.4" height="3.4" rx="1.2" />
-    <rect x="2.8" y="8.3" width="14.4" height="3.4" rx="1.2" />
-    <rect x="2.8" y="13.8" width="14.4" height="3.4" rx="1.2" />
-  </Icon>
-);
-
 /* ── Actions ── */
 
 export const PlusIcon = (p: IconProps) => (
@@ -334,18 +305,6 @@ export const PanelIcon = (p: IconProps) => (
   <Icon {...p}>
     <rect x="2.5" y="3.5" width="15" height="13" rx="2" />
     <path d="M8 3.5v13" />
-  </Icon>
-);
-
-/**
- * A page with a bar across the top and another across the foot: the chrome
- * around the content rather than the content. Deliberately not `MonitorIcon`,
- * which stands for the splash screen in the same sidebar.
- */
-export const ChromeIcon = (p: IconProps) => (
-  <Icon {...p}>
-    <rect x="2.5" y="3.5" width="15" height="13" rx="2" />
-    <path d="M2.5 7.4h15M2.5 12.9h15" />
   </Icon>
 );
 

@@ -93,8 +93,14 @@ export function isSeasonId(value: unknown): value is string {
  * address space, and why `findCalendarSlugOwner` checks both kinds before
  * either is saved.
  */
-export function seasonHref(site: SiteRef, season: Pick<Season, "slug">): string {
-  return sitePath(site, "calendar", season.slug);
+/*
+ * There is no page per record on this site — the calendar is one page, at
+ * /schedule — so every address below is that page. The builders stay because
+ * the sitemap and the revalidators go through them, and the day a record gets
+ * a page of its own is the day this changes in one place.
+ */
+export function seasonHref(site: SiteRef, _season: Pick<Season, "slug">): string {
+  return sitePath(site, "schedule");
 }
 
 /** The slug in a stored season link of THIS site, or "" — see `slugUnder`. */

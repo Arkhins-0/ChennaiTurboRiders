@@ -58,25 +58,15 @@ type Column = { name: string; json?: boolean };
 type Target = { table: string; columns: Column[] };
 
 const TARGETS: Target[] = [
-  { table: "page_sections", columns: [{ name: "data", json: true }] },
-  { table: "banners", columns: [{ name: "image" }] },
-  { table: "posts", columns: [{ name: "image" }] },
-  { table: "partners", columns: [{ name: "logo" }] },
-  { table: "deck_pages", columns: [{ name: "url" }] },
-  { table: "sports", columns: [{ name: "logo_url" }, { name: "photo_url" }] },
   { table: "tracks", columns: [{ name: "photo_url" }, { name: "map_url" }] },
   { table: "track_links", columns: [{ name: "href" }] },
-  { table: "forms", columns: [{ name: "fields", json: true }, { name: "sections", json: true }] },
-  /*
-   * An article's cover is a plain column; its body is a document holding the
-   * addresses of every picture dropped into the middle of the text. Without the
-   * second one, renaming an article moves its folder and leaves every inline
-   * image pointing at a key that no longer exists — the article would still load
-   * and every picture in it would be broken.
-   */
   { table: "articles", columns: [{ name: "cover_image" }, { name: "body", json: true }] },
-  /* An event is the same two shapes as an article, and for the same reason. */
   { table: "events", columns: [{ name: "cover_image" }, { name: "body", json: true }] },
+  /* The four migration 0024 added. Same columns `findUsage` scans. */
+  { table: "drivers", columns: [{ name: "image" }, { name: "hero_image" }] },
+  { table: "sponsors", columns: [{ name: "logo" }, { name: "full_logo" }] },
+  { table: "team_profile", columns: [{ name: "principal_image" }, { name: "about_image" }, { name: "hero_video" }] },
+  { table: "car", columns: [{ name: "image" }, { name: "image_2" }, { name: "image_3" }] },
 ];
 
 /** `strpos`, not LIKE: the needle is a literal and `%` and `_` are not wildcards in it. */
@@ -128,11 +118,11 @@ export async function rewriteKeyPrefix(from: string, to: string): Promise<number
   const sql = getSql();
 
   /*
-   * All nine in ONE transaction, built as an array.
+   * All eight in ONE transaction, built as an array.
    *
    * The Neon HTTP driver cannot interleave JavaScript inside a transaction:
    * `sql.transaction` takes the statements up front and sends them together. A
-   * `for` loop with `await` would therefore be nine separate transactions, and a
+   * `for` loop with `await` would therefore be eight separate transactions, and a
    * failure between two of them leaves the site half on the old folder and half
    * on the new — the one state that neither re-running nor rolling back can
    * describe. The repos build their multi-statement writes the same way; see

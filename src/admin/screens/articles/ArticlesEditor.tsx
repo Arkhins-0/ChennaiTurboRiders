@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ARTICLE_STATUS_LABELS, BLANK_ARTICLE, type Article } from "@/lib/articles";
-import type { Chrome } from "@/lib/chrome";
 import { folderForEntity, folderForModule } from "@/lib/mediaPaths";
 import type { SlugHolder } from "@/lib/slug";
 import { cn } from "@/lib/utils";
@@ -43,19 +42,14 @@ const ORDER_SAVE_DELAY = 500;
 
 export function ArticlesEditor({
   initialArticles,
-  chrome,
   siteUrl,
-  year,
 }: {
   initialArticles: Article[];
-  /** The landing document — the header and footer the preview draws. */
-  chrome: Chrome;
   /**
    * Where the public site answers. The admin is on a different hostname, so a
    * relative link to an article from here would resolve against the admin host.
    */
   siteUrl: string;
-  year: number;
 }) {
   // The sport this screen belongs to. Every write below names it, so the
   // server guards the right one — see SiteScope.
@@ -415,8 +409,6 @@ export function ArticlesEditor({
               and a preview shrunk into what is left would be unreadable. */}
           <ArticlePreview
             article={adding ? null : active}
-            chrome={chrome}
-            year={year}
             className="hidden lg:block lg:min-w-0 lg:flex-1"
           />
 

@@ -1,8 +1,6 @@
 import { SITE } from "@/config/site";
 import { requireSite } from "@/lib/server/access";
-import { getChrome } from "@/lib/server/contentRepo";
 import { listEvents } from "@/lib/server/eventsRepo";
-import { listFormsForSite } from "@/lib/server/formsRepo";
 import { listTracks } from "@/lib/server/tracksRepo";
 import { EventsEditor } from "@/admin/screens/events/EventsEditor";
 
@@ -21,19 +19,14 @@ type Props = { params: Promise<{ sport: string }> };
  *
  * Deliberately uses the throwing loader for the events themselves: an editor
  * that quietly showed an empty season after a failed read would invite someone
- * to announce the same four weekends a second time. The circuits, the forms and
+ * to announce the same four weekends a second time. The circuits and
  * the chrome beside it are only there for the pickers and the preview.
  */
 export default async function EventsAdminPage({ params }: Props) {
   const { sport } = await params;
   const { site } = await requireSite(sport, "events");
 
-  const [events, tracks, forms, chrome] = await Promise.all([
-    listEvents(site.id),
-    listTracks(site.id),
-    listFormsForSite(site.id),
-    getChrome(site),
-  ]);
+  const [events, tracks] = await Promise.all([listEvents(site.id), listTracks(site.id)]);
 
   /*
    * The public origin, handed down rather than imported by the editor. The admin
@@ -46,10 +39,7 @@ export default async function EventsAdminPage({ params }: Props) {
     <EventsEditor
       initialEvents={events}
       tracks={tracks}
-      forms={forms}
-      chrome={chrome}
       siteUrl={`${SITE.url}${site.kind === "root" ? "" : `/${site.slug}`}`}
-      year={new Date().getFullYear()}
     />
   );
 }

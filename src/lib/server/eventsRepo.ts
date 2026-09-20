@@ -41,7 +41,7 @@ const DUPLICATE = "23505";
 /** Everything but the body. The addresses are joined on. */
 const SUMMARY =
   `e.id, e.site_id, e.season_id, e.round, e.title, e.subtitle, e.venue, e.city,
-   e.track_id, e.form_id, e.date_from, e.date_to, e.dates, e.badge,
+   e.track_id, e.date_from, e.date_to, e.dates, e.badge,
    e.status, e.cover_image, e.sort_order`;
 
 const SLUG = `
@@ -63,7 +63,6 @@ type SummaryRow = {
   venue: string;
   city: string;
   track_id: string | null;
-  form_id: string | null;
   date_from: string | Date | null;
   date_to: string | Date | null;
   dates: string;
@@ -114,7 +113,6 @@ function summarise(row: SummaryRow): EventSummary {
     city: row.city,
     // "" rather than null, so a picker's value and a stored id are one type.
     track_id: row.track_id ?? "",
-    form_id: row.form_id ?? "",
     date_from: dateText(row.date_from),
     date_to: dateText(row.date_to),
     dates: row.dates,
@@ -332,12 +330,11 @@ async function insertEvent(
 
   const rows = (await sql`
     INSERT INTO ctr.events (site_id, season_id, round, title, subtitle, venue, city,
-                            track_id, form_id, date_from, date_to, dates, badge,
+                            track_id, date_from, date_to, dates, badge,
                             status, cover_image, body, sort_order)
     VALUES (${siteId}, ${await seasonOf(siteId, e.season_id)},
             ${e.round}, ${e.title}, ${e.subtitle}, ${e.venue}, ${e.city},
             (SELECT id FROM ctr.tracks WHERE id::text = ${e.track_id} AND site_id = ${siteId}),
-            (SELECT id FROM ctr.forms  WHERE id::text = ${e.form_id}  AND site_id = ${siteId}),
             ${e.date_from || null}, ${e.date_to || null}, ${e.dates}, ${e.badge},
             ${e.status}, ${e.cover_image}, ${JSON.stringify(e.body)}::jsonb, ${e.sort_order})
     RETURNING id
@@ -421,7 +418,6 @@ export async function updateEvent(
            venue       = ${e.venue},
            city        = ${e.city},
            track_id    = (SELECT id FROM ctr.tracks WHERE id::text = ${e.track_id} AND site_id = ${site}),
-           form_id     = (SELECT id FROM ctr.forms  WHERE id::text = ${e.form_id}  AND site_id = ${site}),
            date_from   = ${e.date_from || null},
            date_to     = ${e.date_to || null},
            dates       = ${e.dates},

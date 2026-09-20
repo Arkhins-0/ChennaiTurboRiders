@@ -26,6 +26,5 @@ import { siteHref, type SiteRef } from "@/lib/sites";
 export function revalidateEventPages(site: SiteRef): void {
   revalidatePath(siteHref(site) || "/"); // the calendar band draws the season
   revalidatePath(calendarHref(site));
-  revalidatePath(site.kind === "root" ? "/calendar/[slug]" : "/[sport]/calendar/[slug]", "page");
   revalidatePath("/sitemap.xml");
 }

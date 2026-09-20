@@ -2,7 +2,7 @@ import "server-only";
 
 import { normaliseAdminInput, type AdminAccount } from "@/lib/admins";
 import { hashPassword } from "@/lib/server/auth";
-import { type Capability, type Grant } from "@/lib/roles";
+import { type Grant } from "@/lib/roles";
 import { getSql } from "@/lib/server/db";
 
 /**
@@ -37,10 +37,7 @@ export async function listAdmins(): Promise<AdminAccount[]> {
                      'siteId', g.site_id, 'siteSlug', s.slug, 'module', g.module)
                      ORDER BY s.sort_order, g.module), '[]'::jsonb)
              FROM ctr.admin_grants g JOIN ctr.sites s ON s.id = g.site_id
-            WHERE g.admin_id = a.id) AS grants,
-           (SELECT coalesce(jsonb_agg(c.capability ORDER BY c.capability), '[]'::jsonb)
-              FROM ctr.admin_capabilities c
-             WHERE c.admin_id = a.id) AS capabilities
+            WHERE g.admin_id = a.id) AS grants
       FROM ctr.admins a
      ORDER BY a.username ASC
   `) as AdminAccount[];
@@ -56,10 +53,7 @@ export async function getAdmin(id: string): Promise<AdminAccount | null> {
                      'siteId', g.site_id, 'siteSlug', s.slug, 'module', g.module)
                      ORDER BY s.sort_order, g.module), '[]'::jsonb)
              FROM ctr.admin_grants g JOIN ctr.sites s ON s.id = g.site_id
-            WHERE g.admin_id = a.id) AS grants,
-           (SELECT coalesce(jsonb_agg(c.capability ORDER BY c.capability), '[]'::jsonb)
-              FROM ctr.admin_capabilities c
-             WHERE c.admin_id = a.id) AS capabilities
+            WHERE g.admin_id = a.id) AS grants
       FROM ctr.admins a
      WHERE a.id = ${id}
   `) as AdminAccount[];
@@ -74,36 +68,22 @@ export async function getAdmin(id: string): Promise<AdminAccount | null> {
  * dropped, which is the difference this table makes: `normalisePages` filtered
  * unknown keys out on the way in, and nothing checked what was already stored.
  */
-async function writeGrants(
-  id: string,
-  grants: readonly Grant[],
-  capabilities: readonly Capability[]
-): Promise<void> {
+async function writeGrants(id: string, grants: readonly Grant[]): Promise<void> {
   const sql = getSql();
 
   /*
-   * Both lists in ONE transaction, not two calls.
-   *
-   * They are written together because they are read together — a save that
-   * replaced the grants and then failed on the capabilities would leave an
-   * account holding exactly half of what the form said, with no error the
-   * screen could act on. Same reason the password change and the session purge
-   * share a transaction below.
+   * The delete and the inserts in ONE transaction, not two calls: a save that
+   * cleared the old grants and then failed on the new ones would leave an
+   * account holding nothing, with no error the screen could act on. Same
+   * reason the password change and the session purge share a transaction
+   * below.
    */
   await sql.transaction([
     sql`DELETE FROM ctr.admin_grants WHERE admin_id = ${id}`,
-    sql`DELETE FROM ctr.admin_capabilities WHERE admin_id = ${id}`,
     ...grants.map(
       (grant) => sql`
         INSERT INTO ctr.admin_grants (admin_id, site_id, module)
         VALUES (${id}, ${grant.siteId}, ${grant.module})
-        ON CONFLICT DO NOTHING
-      `
-    ),
-    ...capabilities.map(
-      (capability) => sql`
-        INSERT INTO ctr.admin_capabilities (admin_id, capability)
-        VALUES (${id}, ${capability})
         ON CONFLICT DO NOTHING
       `
     ),
@@ -137,7 +117,7 @@ export async function createAdmin(input: unknown, password: string): Promise<Adm
     RETURNING id
   `) as { id: string }[];
 
-  await writeGrants(rows[0].id, account.grants, account.capabilities);
+  await writeGrants(rows[0].id, account.grants);
 
   const created = await getAdmin(rows[0].id);
   if (!created) throw new Error("The account was not written.");
@@ -169,7 +149,7 @@ export async function updateAdmin(
 
   if (rows.length === 0) return null;
 
-  await writeGrants(id, account.grants, account.capabilities);
+  await writeGrants(id, account.grants);
 
   const updated = await getAdmin(id);
   if (!updated || !password) return updated;

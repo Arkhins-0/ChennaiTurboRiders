@@ -14,9 +14,15 @@
  * has `pages`, and no row does.
  */
 
-export type AdminCapabilitiesRow = {
-  admin_id: string;
-  capability: string;
+export type AchievementsRow = {
+  id: string;
+  site_id: string;
+  year: string;
+  title: string;
+  description: string;
+  sort_order: number;
+  created_at: Date;
+  updated_at: Date;
 };
 
 export type AdminGrantsRow = {
@@ -45,52 +51,64 @@ export type ArticlesRow = {
   created_at: Date;
   updated_at: Date;
   site_id: string;
+  category: string;
+  author: string;
+  tags: unknown;
 };
 
-export type BannersRow = {
-  banner_id: string;
-  position: number;
-  template: string;
-  image: string;
-  fit: string;
-  focus: string;
-  overlay: string;
-  title: string;
-  subtitle: string;
-  cta_label: string;
-  cta_href: string;
-  section_id: string;
-};
-
-export type DeckPagesRow = {
-  deck_id: string;
-  position: number;
-  url: string;
-  alt: string;
-};
-
-export type DecksRow = {
-  id: string;
+export type CarRow = {
+  site_id: string;
   name: string;
-  status: string;
-  blurb: string;
-  show_heading: boolean;
+  tagline: string;
+  year: number;
+  description: string;
+  image: string;
+  image_2: string;
+  image_3: string;
+  updated_at: Date;
+};
+
+export type CarSpecsRow = {
+  site_id: string;
+  position: number;
+  label: string;
+  value: string;
+};
+
+export type DriverHighlightsRow = {
+  driver_id: string;
+  position: number;
+  text: string;
+};
+
+export type DriversRow = {
+  id: string;
+  site_id: string;
+  slug: string;
+  first_name: string;
+  last_name: string;
+  nationality: string;
+  country_code: string;
+  flag_emoji: string;
+  championship: string;
+  car: string;
+  number: number;
+  date_of_birth: string | null;
+  height: string;
+  weight: string;
+  image: string;
+  hero_image: string;
+  quote: string;
+  biography: string;
+  race_wins: number;
+  pole_positions: number;
+  grands_prix: number;
+  podiums: number;
+  fastest_laps: number;
+  points: number;
   sort_order: number;
   created_at: Date;
   updated_at: Date;
-  site_id: string;
-};
-
-export type EnquiriesRow = {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  ip: string;
-  user_agent: string;
-  created_at: Date;
-  status: string;
-  archived_at: Date | null;
 };
 
 export type EventsRow = {
@@ -102,7 +120,6 @@ export type EventsRow = {
   venue: string;
   city: string;
   track_id: string | null;
-  form_id: string | null;
   date_from: string | null;
   date_to: string | null;
   dates: string;
@@ -114,100 +131,6 @@ export type EventsRow = {
   created_at: Date;
   updated_at: Date;
   season_id: string;
-};
-
-export type FormEntriesRow = {
-  id: string;
-  form_id: string;
-  ip: string;
-  user_agent: string;
-  created_at: Date;
-};
-
-export type FormEntryAnswersRow = {
-  entry_id: string;
-  field_id: string;
-  idx: number;
-  is_list: boolean;
-  value_text: string;
-  value_num: string | null;
-  value_date: string | null;
-};
-
-export type FormEntryFilesRow = {
-  entry_id: string;
-  field_id: string;
-  idx: number;
-  s3_key: string;
-  file_name: string;
-  size_bytes: string;
-};
-
-export type FormNoncesRow = {
-  nonce: string;
-  expires_at: Date;
-};
-
-export type FormsRow = {
-  id: string;
-  name: string;
-  status: string;
-  blurb: string;
-  intro_title: string;
-  intro_body: string;
-  submit_label: string;
-  success_title: string;
-  success_body: string;
-  closed_note: string;
-  notify_to: string;
-  fields: unknown;
-  sections: unknown;
-  opens_at: Date | null;
-  closes_at: Date | null;
-  max_entries: number;
-  sort_order: number;
-  created_at: Date;
-  updated_at: Date;
-  site_id: string;
-};
-
-export type PageSectionsRow = {
-  type: string;
-  position: number;
-  visible: boolean;
-  data: unknown;
-  updated_at: Date;
-  page_id: string;
-  id: string;
-};
-
-export type PagesRow = {
-  id: string;
-  site_id: string;
-  kind: string;
-  slug: string;
-  name: string;
-  sort_order: number;
-};
-
-export type PartnersRow = {
-  position: number;
-  name: string;
-  logo: string;
-  href: string;
-  section_id: string;
-};
-
-export type PostsRow = {
-  post_id: string;
-  position: number;
-  image: string;
-  category: string;
-  date: string;
-  title: string;
-  excerpt: string;
-  href: string;
-  section_id: string;
 };
 
 export type SchemaMigrationsRow = {
@@ -262,19 +185,61 @@ export type SlugsRow = {
   site_id: string;
 };
 
-export type SportsRow = {
+export type SponsorsRow = {
   id: string;
-  title: string;
-  text: string;
-  details: string;
-  logo_url: string;
-  photo_url: string;
-  href: string;
+  site_id: string;
+  tier: string;
+  slug: string;
+  name: string;
+  logo: string;
+  full_logo: string;
+  website: string;
+  description: string;
   sort_order: number;
-  is_visible: boolean;
   created_at: Date;
   updated_at: Date;
-  site_id: string | null;
+};
+
+export type TeamProfileRow = {
+  site_id: string;
+  name: string;
+  abbreviation: string;
+  tagline: string;
+  description: string;
+  founded: number;
+  current_season: number;
+  headquarters: string;
+  championship: string;
+  official_website: string;
+  contact_email: string;
+  contact_phone: string;
+  contact_address: string;
+  contact_map_embed: string;
+  instagram_url: string;
+  facebook_url: string;
+  twitter_url: string;
+  youtube_url: string;
+  principal_name: string;
+  principal_title: string;
+  principal_image: string;
+  hero_title: string;
+  hero_subtitle: string;
+  hero_description: string;
+  hero_video: string;
+  about_title: string;
+  about_subtitle: string;
+  about_body_1: string;
+  about_body_2: string;
+  about_image: string;
+  updated_at: Date;
+};
+
+export type TeamStatsRow = {
+  site_id: string;
+  placement: string;
+  position: number;
+  value: string;
+  label: string;
 };
 
 export type TrackLinksRow = {
@@ -316,31 +281,24 @@ export type TracksRow = {
 
 /** Every table in the schema, by name. */
 export type CtrTables = {
-  admin_capabilities: AdminCapabilitiesRow;
+  achievements: AchievementsRow;
   admin_grants: AdminGrantsRow;
   admins: AdminsRow;
   articles: ArticlesRow;
-  banners: BannersRow;
-  deck_pages: DeckPagesRow;
-  decks: DecksRow;
-  enquiries: EnquiriesRow;
+  car: CarRow;
+  car_specs: CarSpecsRow;
+  driver_highlights: DriverHighlightsRow;
+  drivers: DriversRow;
   events: EventsRow;
-  form_entries: FormEntriesRow;
-  form_entry_answers: FormEntryAnswersRow;
-  form_entry_files: FormEntryFilesRow;
-  form_nonces: FormNoncesRow;
-  forms: FormsRow;
-  page_sections: PageSectionsRow;
-  pages: PagesRow;
-  partners: PartnersRow;
-  posts: PostsRow;
   schema_migrations: SchemaMigrationsRow;
   seasons: SeasonsRow;
   sessions: SessionsRow;
   site_modules: SiteModulesRow;
   sites: SitesRow;
   slugs: SlugsRow;
-  sports: SportsRow;
+  sponsors: SponsorsRow;
+  team_profile: TeamProfileRow;
+  team_stats: TeamStatsRow;
   track_links: TrackLinksRow;
   tracks: TracksRow;
 };

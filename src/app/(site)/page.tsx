@@ -6,12 +6,16 @@ import { CarSpecsSection } from "@/components/site/sections/CarSpecsSection";
 import { ScheduleSection } from "@/components/site/sections/ScheduleSection";
 import { NewsSection } from "@/components/site/sections/NewsSection";
 import { SponsorsSection } from "@/components/site/sections/SponsorsSection";
-import { site } from "@/data/site-data";
+import { siteCar, siteTeam } from "@/lib/server/siteContent";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // One await for the pair: both reads are memoised for the request, and the
+  // bands below do their own — each is a server component of its own.
+  const [{ site, hero }, car] = await Promise.all([siteTeam(), siteCar()]);
+
   return (
     <>
-      <Hero />
+      <Hero site={site} hero={hero} car={car} />
       <TextMarquee
         primary={site.tagline.replace(/\.$/, "")}
         secondary={`Season ${site.currentSeason} · ${site.championship.split(" (")[0]}`}

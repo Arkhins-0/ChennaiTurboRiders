@@ -166,13 +166,13 @@ export function ArticleForm({
 
           {article.status === "published" && article.slug ? (
             <a
-              href={`${siteUrl}/articles/${article.slug}`}
+              href={`${siteUrl}/news/${article.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-muted-fg underline underline-offset-2 transition-colors hover:text-foreground"
             >
               <ExternalIcon className="size-3.5" />
-              Open /articles/{article.slug}
+              Open /news/{article.slug}
             </a>
           ) : null}
         </div>

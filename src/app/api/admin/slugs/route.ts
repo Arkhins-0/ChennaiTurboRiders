@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
 import { isArticleId } from "@/lib/articles";
-import { isDeckId } from "@/lib/decks";
 import { isEventId } from "@/lib/events";
-import { isFormId } from "@/lib/forms";
 import { type GrantModule } from "@/lib/roles";
 import { isUsableSlug, type SlugCheck, type SlugKind } from "@/lib/slug";
 import { guardRequestSite } from "@/lib/server/access";
 import type { SiteRef } from "@/lib/sites";
 import * as articles from "@/lib/server/articlesRepo";
-import * as decks from "@/lib/server/decksRepo";
 import * as events from "@/lib/server/eventsRepo";
-import * as forms from "@/lib/server/formsRepo";
 import { revalidateArticlePages } from "@/lib/server/revalidateArticles";
-import { revalidateDeckPages } from "@/lib/server/revalidateDecks";
 import { revalidateEventPages } from "@/lib/server/revalidateEvents";
-import { revalidateFormPages } from "@/lib/server/revalidateForms";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,31 +53,13 @@ type Repo = {
     siteId: string,
     slug: string,
     exceptId?: string
-  ) => Promise<Awaited<ReturnType<typeof decks.findSlugOwner>>>;
+  ) => Promise<Awaited<ReturnType<typeof articles.findSlugOwner>>>;
   releaseFormerSlug: (siteId: string, slug: string, fromId: string) => Promise<boolean>;
   isId: (value: unknown) => value is string;
   revalidate: (site: SiteRef, slug: string) => void;
 };
 
 const REPOS: Record<SlugKind, Repo> = {
-  form: {
-    module: "forms",
-    findSlugOwner: forms.findSlugOwner,
-    releaseFormerSlug: forms.releaseFormerSlug,
-    isId: isFormId,
-    // The forms revalidator takes no slug — a form's own page is rendered on
-    // demand, so only the pages listing them are cached.
-    revalidate: (site) => revalidateFormPages(site),
-  },
-  deck: {
-    module: "decks",
-    findSlugOwner: decks.findSlugOwner,
-    releaseFormerSlug: decks.releaseFormerSlug,
-    isId: isDeckId,
-    // The released address stops redirecting, so a cached page sitting under it
-    // would keep serving the old deck to anyone on the old link.
-    revalidate: (site, slug) => revalidateDeckPages(site, [slug]),
-  },
   article: {
     module: "articles",
     findSlugOwner: articles.findSlugOwner,
@@ -103,7 +79,7 @@ const REPOS: Record<SlugKind, Repo> = {
 };
 
 function repoFor(value: unknown): Repo | null {
-  return value === "form" || value === "deck" || value === "article" || value === "event"
+  return value === "article" || value === "event"
     ? REPOS[value]
     : null;
 }

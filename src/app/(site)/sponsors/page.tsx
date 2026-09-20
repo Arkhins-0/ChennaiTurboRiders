@@ -3,21 +3,28 @@ import { ArrowUpRight } from "lucide-react";
 import { LogoMarquee } from "@/components/site/LogoMarquee";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
-import { contact, site, sponsors } from "@/data/site-data";
-import type { Sponsor } from "@/types/site";
+import { siteSponsors, siteTeam } from "@/lib/server/siteContent";
+import { SPONSOR_TIER_LABELS, SPONSOR_TIERS, type Sponsor } from "@/types/site";
 
 export const metadata: Metadata = {
   title: "Partners",
   description: "The partners and sponsors powering Chennai Turbo Riders.",
 };
 
-const tiers: { label: string; items: Sponsor[] }[] = [
-  { label: "Title Partner", items: sponsors.title },
-  { label: "Principal Partner", items: sponsors.principal },
-  { label: "Official Partners", items: sponsors.official },
-];
+export default async function SponsorsPage() {
+  const [sponsors, { site, contact }] = await Promise.all([siteSponsors(), siteTeam()]);
 
-export default function SponsorsPage() {
+  /*
+   * All four tiers here, unlike the band on the home page, which shows three.
+   * This is the full board, so a technical partner belongs on it — and the
+   * labels come from SPONSOR_TIER_LABELS rather than being written out again,
+   * so the console and the page call a tier the same thing.
+   */
+  const tiers: { label: string; items: Sponsor[] }[] = SPONSOR_TIERS.map((tier) => ({
+    label: SPONSOR_TIER_LABELS[tier],
+    items: sponsors[tier],
+  }));
+
   const all = tiers.flatMap((tier) => tier.items);
   const items = all.map((s) => ({ id: s.id, label: s.name, href: s.website, logo: s.logo }));
 

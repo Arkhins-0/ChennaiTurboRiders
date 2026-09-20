@@ -1,7 +1,6 @@
 import { SITE } from "@/config/site";
 import { requireSite } from "@/lib/server/access";
 import { listArticles } from "@/lib/server/articlesRepo";
-import { getChrome } from "@/lib/server/contentRepo";
 import { ArticlesEditor } from "@/admin/screens/articles/ArticlesEditor";
 
 export const dynamic = "force-dynamic";
@@ -21,17 +20,12 @@ export default async function ArticlesAdminPage({ params }: Props) {
   const { sport } = await params;
   const { session, site } = await requireSite(sport, "articles");
 
-  const [articles, chrome] = await Promise.all([
-    listArticles(session, site.id),
-    getChrome(site),
-  ]);
+  const articles = await listArticles(session, site.id);
 
   return (
     <ArticlesEditor
       initialArticles={articles}
-      chrome={chrome}
       siteUrl={SITE.url}
-      year={new Date().getFullYear()}
     />
   );
 }

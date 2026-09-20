@@ -1,4 +1,4 @@
-import { site } from "@/data/site-data";
+import { siteTeam } from "@/lib/server/siteContent";
 
 /**
  * The top of every inner page, dressed as a broadcast title card.
@@ -8,7 +8,7 @@ import { site } from "@/data/site-data";
  * standfirst set to the right. The grid behind it fades out towards the edges
  * so it reads as a surface, not a spreadsheet.
  */
-export function PageHeader({
+export async function PageHeader({
   crumb,
   title,
   description,
@@ -21,6 +21,10 @@ export function PageHeader({
   /** A short fact set on the right — "8 drivers", "Season 6". */
   aside?: string;
 }) {
+  // The team's initials, for the breadcrumb. One read per request: `siteTeam`
+  // is memoised, and every page on the site draws this header.
+  const { site } = await siteTeam();
+
   return (
     <section className="relative overflow-hidden bg-carbon-950 pb-14 pt-32 md:pb-20 md:pt-44">
       <div className="hud-grid pointer-events-none absolute inset-0" />

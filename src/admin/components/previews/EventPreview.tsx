@@ -1,17 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Chrome } from "@/lib/chrome";
 import { eventName, type CtrEvent } from "@/lib/events";
 import { eventDateLabel, eventDateParts } from "@/lib/raceDates";
 import { richTextIsEmpty } from "@/lib/richtext";
 import { findTrack, type Track } from "@/lib/tracks";
 import { cn } from "@/lib/utils";
 import { PreviewMode } from "@/components/ui/PreviewMode";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { PinIcon } from "@/lib/sections/shared/icons";
-import { ArticleBody } from "@/app/(site)/_shell/articles/ArticleBody";
+import { ArticleBody } from "@/components/site/articles/ArticleBody";
 import { Media } from "@/components/ui/Media";
 
 /**
@@ -40,18 +36,34 @@ import { Media } from "@/components/ui/Media";
 /** The viewport width the preview pretends to be. */
 const PREVIEW_WIDTH = 1440;
 
+/** The pin beside the venue. Was in the sections library, which is gone. */
+function PinIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinejoin="round"
+      aria-hidden
+      className="shrink-0"
+    >
+      <path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
 export function EventPreview({
   event,
   tracks,
-  chrome,
-  year,
   className,
 }: {
   /** The draft being edited, or null when no event is open. */
   event: CtrEvent | null;
   tracks: Track[];
-  chrome: Chrome;
-  year: number;
   className?: string;
 }) {
   const paneRef = useRef<HTMLDivElement>(null);
@@ -91,13 +103,15 @@ export function EventPreview({
     >
       <div style={{ zoom: scale }} className="pointer-events-none origin-top-left">
         <PreviewMode>
-          <div className="bg-page p-3">
-            <div className="overflow-hidden rounded-card bg-surface">
-              <SiteHeader
-                content={chrome}
-                home={false}
-                className="relative z-20 border-b border-line bg-surface"
-              />
+          {/*
+            No header and no footer around the record. They used to be drawn
+            from the chrome document — the section-built header and footer of
+            the platform this console was ported from — and this site has
+            neither: its navigation and footer are components that read the
+            team's profile. What is worth previewing is the record itself.
+          */}
+          <div className="min-h-[60vh] bg-carbon-950 p-8 text-white">
+            <div className="mx-auto max-w-4xl">
 
               <section className="shell py-14">
                 {!event ? (
@@ -170,8 +184,6 @@ export function EventPreview({
                   </article>
                 )}
               </section>
-
-              <SiteFooter content={chrome} year={year} />
             </div>
           </div>
         </PreviewMode>

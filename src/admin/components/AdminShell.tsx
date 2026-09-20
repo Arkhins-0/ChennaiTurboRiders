@@ -8,12 +8,9 @@ import {
   ROLE_LABELS,
   canEdit,
   canManageAdmins,
-  canManageSites,
   canManageTeam,
-  canReadEnquiries,
   canSeeAnySite,
   type AdminRole,
-  type Capability,
   type Grant,
 } from "@/lib/roles";
 import type { Site } from "@/lib/sites";
@@ -22,17 +19,13 @@ import { Button } from "@/admin/ui/Button";
 import {
   CalendarIcon,
   CaretDownIcon,
-  ChromeIcon,
   FlagIcon,
   FolderIcon,
-  ImagesIcon,
-  MailIcon,
+  HandshakeIcon,
   MapIcon,
   NewsIcon,
   PanelIcon,
   SignOutIcon,
-  StackIcon,
-  TicketIcon,
   UsersIcon,
 } from "@/admin/ui/icons";
 import { Media } from "@/components/ui/Media";
@@ -128,24 +121,20 @@ function siteNav(site: Site, scope: { role: AdminRole; grants: Grant[] }): NavIt
 
   const rows: NavItem[] = [];
 
-  if (has("page")) {
-    rows.push({
-      href: base,
-      label: site.kind === "root" ? "Landing page" : "Page",
-      icon: site.kind === "root" ? ImagesIcon : FlagIcon,
-      siteId: site.id,
-    });
+  /*
+   * No `on(...)` check beside the `has(...)` on these three: unlike the
+   * circuits they are not SITE_MODULES, so there is no row in ctr.site_modules
+   * to switch them off — every site has a name and a roster, even if the roster
+   * is empty. See the note on GRANT_MODULES in src/lib/roles.ts.
+   */
+  if (has("identity")) {
+    rows.push({ href: `${base}/identity`, label: "Team & site", icon: FlagIcon, siteId: site.id });
   }
-  // Straight after the page, because it is the frame around it — and because
-  // the two are the pair a sport admin moves between while a site is being set
-  // up. A separate grant from the page: see /site/[sport]/chrome.
-  if (has("chrome")) {
-    rows.push({
-      href: `${base}/chrome`,
-      label: "Header and footer",
-      icon: ChromeIcon,
-      siteId: site.id,
-    });
+  if (has("drivers")) {
+    rows.push({ href: `${base}/drivers`, label: "Drivers", icon: UsersIcon, siteId: site.id });
+  }
+  if (has("sponsors")) {
+    rows.push({ href: `${base}/sponsors`, label: "Sponsors", icon: HandshakeIcon, siteId: site.id });
   }
   if (on("circuits") && has("circuits")) {
     rows.push({ href: `${base}/tracks`, label: "Circuits", icon: MapIcon, siteId: site.id });
@@ -153,19 +142,8 @@ function siteNav(site: Site, scope: { role: AdminRole; grants: Grant[] }): NavIt
   if (on("events") && has("events")) {
     rows.push({ href: `${base}/events`, label: "Season", icon: CalendarIcon, siteId: site.id });
   }
-  if (on("decks") && has("decks")) {
-    rows.push({ href: `${base}/decks`, label: "Decks", icon: StackIcon, siteId: site.id });
-  }
   if (on("articles") && has("articles")) {
     rows.push({ href: `${base}/articles`, label: "Articles", icon: NewsIcon, siteId: site.id });
-  }
-  if (on("forms") && has("forms")) {
-    rows.push({
-      href: `${base}/forms`,
-      label: "Registrations",
-      icon: TicketIcon,
-      siteId: site.id,
-    });
   }
   if (canManageTeam(scope, site.id)) {
     rows.push({ href: `${base}/team`, label: "Co-admins", icon: UsersIcon, siteId: site.id });
@@ -184,7 +162,7 @@ function siteNav(site: Site, scope: { role: AdminRole; grants: Grant[] }): NavIt
  * places that are still a flat list.
  */
 function allowedNav(
-  scope: { role: AdminRole; grants: Grant[]; capabilities: Capability[] },
+  scope: { role: AdminRole; grants: Grant[] },
   sites: Site[]
 ): NavItem[] {
   const reachable = sites.filter((site) => siteNav(site, scope).length > 0);
@@ -204,22 +182,9 @@ function allowedNav(
   if (canSeeAnySite(scope)) {
     rows.push({ href: "/media", label: "Media", icon: FolderIcon });
   }
-  if (canManageSites(scope)) {
-    rows.push({ href: "/sports", label: "Sports", icon: PanelIcon });
-  }
   if (canManageAdmins(scope)) {
     rows.push({ href: "/admins", label: "Accounts", icon: UsersIcon });
   }
-  /*
-   * No `site`, and that is not an oversight to be tidied up later: the footer's
-   * message box is on every page of every sport and `ctr.enquiries` has no
-   * `site_id`, so there is no sport this row could be filed under. It is global
-   * in the same way Media is.
-   */
-  if (canReadEnquiries(scope)) {
-    rows.push({ href: "/enquiries", label: "Enquiries", icon: MailIcon });
-  }
-
   return rows;
 }
 
@@ -541,7 +506,6 @@ export function AdminShell({
   username,
   role,
   grants,
-  capabilities,
   sites,
   children,
 }: {
@@ -549,15 +513,13 @@ export function AdminShell({
   role: AdminRole;
   /** Every (sport, module) pair this account holds. Empty for an owner. */
   grants: Grant[];
-  /** What it holds that names no sport — the enquiries. Empty for an owner. */
-  capabilities: Capability[];
   /** Every sport, so the navigation can be built from what exists. */
   sites: Site[];
   children: React.ReactNode;
 }) {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
-  const nav = allowedNav({ role, grants, capabilities }, sites);
+  const nav = allowedNav({ role, grants }, sites);
 
   // Starts expanded and corrects itself on mount. Reading localStorage during
   // render would differ from what the server drew and break hydration.

@@ -1,4 +1,5 @@
-import type { SocialIconName } from "@/lib/sections/socials/model";
+/** The four the footer and the navigation draw, plus a generic globe. */
+export type SocialIconName = "instagram" | "facebook" | "twitter" | "youtube" | "website";
 
 /**
  * Hand-drawn so the footer costs no icon library. Anything unrecognised falls

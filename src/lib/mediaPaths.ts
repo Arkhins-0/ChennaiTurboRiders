@@ -106,11 +106,26 @@ export const DEFAULT_UPLOAD_FOLDER = "uploads";
  * within the sport, so nothing is lost but the nesting.
  */
 export const MODULE_FOLDERS = {
-  decks: "decks",
   circuits: "circuits",
   articles: "articles",
   events: "events",
   seasons: "seasons",
+  /*
+   * The three migration 0024 added.
+   *
+   * `drivers` and `sponsors` get a folder per record, like the circuits —
+   * a driver has a portrait and a wide plate, a sponsor has a mark and a
+   * wordmark, and keeping each one's together is what makes deleting the
+   * record able to tidy up after itself.
+   *
+   * `team` is a module folder with no records under it: the profile and the
+   * car are one row each, so there is nothing to put a per-record folder
+   * beneath. The team photograph, the principal's portrait and the three
+   * car pictures all land directly in it.
+   */
+  drivers: "drivers",
+  sponsors: "sponsors",
+  team: "team",
 } as const;
 
 /** The modules that have a media folder. Not every site module does. */
@@ -218,7 +233,7 @@ export function folderSegments(folder: string): string[] {
   return folder ? folder.split("/") : [];
 }
 
-/** "decks/2025" → "decks". The root's parent is the root. */
+/** "drivers/2025" → "drivers". The root's parent is the root. */
 export function parentFolder(folder: string): string {
   const parts = folderSegments(folder);
   parts.pop();

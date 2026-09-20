@@ -1,6 +1,6 @@
 import { Reveal } from "@/components/site/Reveal";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { carSpecs } from "@/data/site-data";
+import { siteCar } from "@/lib/server/siteContent";
 
 /**
  * The machine, as a telemetry sheet.
@@ -10,7 +10,8 @@ import { carSpecs } from "@/data/site-data";
  * that draws itself in as the row arrives. The two detail shots close the
  * sheet.
  */
-export function CarSpecsSection() {
+export async function CarSpecsSection() {
+  const carSpecs = await siteCar();
   const [primary, secondary, tertiary] = [carSpecs.image, carSpecs.image2, carSpecs.image3];
 
   return (

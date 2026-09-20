@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Counter } from "@/components/site/Counter";
-import { carSpecs, hero, site } from "@/data/site-data";
+import type { CarSpecs, HeroData, SiteConfig } from "@/types/site";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const words = ["Chennai", "Turbo", "Riders"];
@@ -20,7 +20,25 @@ const words = ["Chennai", "Turbo", "Riders"];
  * numbers count up along the baseline. Everything drifts up and fades as the
  * page is scrolled, so the next band arrives over it.
  */
-export function Hero() {
+/*
+ * Its content arrives as props, not as an import.
+ *
+ * This is a "use client" component — the video, the scroll transform and the
+ * reduced-motion check all need the browser — so it cannot await a repo. The
+ * home page reads the three it needs and hands them down, which is the shape
+ * every client component in the (site) tree uses now that the content is in
+ * the database rather than in a file that could be imported from anywhere.
+ */
+export function Hero({
+  site,
+  hero,
+  /* The car, for the still behind the video and for its poster frame. */
+  car,
+}: {
+  site: SiteConfig;
+  hero: HeroData;
+  car: CarSpecs;
+}) {
   const reduced = useReducedMotion();
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 600], [0, reduced ? 0 : 140]);
@@ -40,7 +58,7 @@ export function Hero() {
       {/* The feed */}
       <div className="absolute inset-0">
         <img
-          src={carSpecs.image}
+          src={car.image}
           alt=""
           loading="eager"
           fetchPriority="high"
@@ -54,7 +72,7 @@ export function Hero() {
           playsInline
           preload="metadata"
           aria-hidden
-          poster={carSpecs.image}
+          poster={car.image}
           className="absolute inset-0 h-full w-full object-cover"
         >
           <source src={hero.videoSrc} type="video/mp4" />

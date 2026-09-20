@@ -23,7 +23,7 @@
  *   sport admin   one grant: (site, "*"). Everything on that site, including
  *                 handing pieces of it to co-admins — but only on that site,
  *                 and never another "*".
- *   co-admin      one grant per module: (site, "articles"), (site, "decks")…
+ *   co-admin      one grant per module: (site, "articles"), (site, "drivers")…
  *   nothing       no grants. Signs in, reaches no screen. Carried faithfully
  *                 from the old data, where an account could already be scoped
  *                 to nothing at all.
@@ -67,25 +67,31 @@ export const ROLE_HINTS: Record<AdminRole, string> = {
  * `SITE_MODULES` are the features a site may or may not have. These three are
  * on every site by construction, so they are here and not there:
  *
- *   page     the home page's sections
- *   chrome   the header and footer
+ *   identity the site's own name, contact block, social links, hero and about
+ *            copy, achievements and car
+ *   drivers  the roster
+ *   sponsors the partner board
  *   team     the co-admins for this site — grantable on its own, so somebody
  *            can run the roster without being able to edit the copy
+ *
+ * `page` and `chrome` used to be here as well: the section-built landing page
+ * and its header and footer. Migration 0025 removed both — this site's pages
+ * are hand-built components that read the tables above, so there was no page
+ * for those grants to open. See the note at the top of that migration.
  *
  * `*` is not a module, it is "all of the above and any added later". A sport
  * admin holds one and does not have to be re-granted when a feature is
  * switched on.
  */
-export const GRANT_MODULES = ["*", "page", "chrome", "team", ...SITE_MODULES] as const;
+export const GRANT_MODULES = ["*", "identity", "drivers", "sponsors", "team", ...SITE_MODULES] as const;
 export type GrantModule = (typeof GRANT_MODULES)[number];
 
 export const GRANT_LABELS: Record<GrantModule, string> = {
   "*": "Everything on this sport",
-  page: "The page",
-  chrome: "Header and footer",
+  identity: "Team & site",
+  drivers: "Drivers",
+  sponsors: "Sponsors",
   team: "Co-admins",
-  decks: "Decks",
-  forms: "Registrations",
   articles: "Articles",
   events: "Calendar",
   circuits: "Circuits",
@@ -106,48 +112,13 @@ export type Grant = {
   module: GrantModule;
 };
 
-/**
- * What an account may reach that belongs to no sport.
- *
- * A grant is a (site, module) pair, which is the right shape for everything the
- * console edits — because everything the console edits belongs to a sport. The
- * enquiries do not. The footer's message box is on every page of every site and
- * `ctr.enquiries` has no `site_id` by design, so there is no site to put in a
- * grant and no honest way to write one.
- *
- * So a capability is a grant with the site left out. It is a separate list
- * rather than a `GrantModule` with a null site because the two answer different
- * questions and mixing them would mean every existing predicate had to start
- * asking "…but is the site part real?".
- *
- * `media` is deliberately NOT one, and the argument is unchanged from 0013: a
- * folder belongs to a site, so "may they open incrc/decks/?" is already
- * answered by "have they any grant on incrc?". A capability would be a second
- * source of truth for a question the first one answers.
- */
-export const CAPABILITIES = ["enquiries"] as const;
-export type Capability = (typeof CAPABILITIES)[number];
-
-export const CAPABILITY_LABELS: Record<Capability, string> = {
-  enquiries: "Enquiries",
-};
-
-export const CAPABILITY_HINTS: Record<Capability, string> = {
-  enquiries: "The messages people send from the footer, on every sport. Not tied to one.",
-};
 
 /**
  * Everything the predicates need. `AdminSession` satisfies it.
- *
- * `capabilities` is optional so that the callers which build a scope by hand
- * out of a role and some grants keep compiling. Absent reads as none, which is
- * the safe direction: forgetting to pass them closes a door rather than opening
- * one.
  */
 export type Scoped = {
   role: AdminRole;
   grants: Grant[];
-  capabilities?: readonly Capability[];
 };
 
 /* ─────────────────────────────── The tests ──────────────────────────────── */
@@ -263,49 +234,13 @@ export function modulesFor(
   return available.filter((module) => module !== "*" && canEdit(session, siteId, module));
 }
 
-/**
- * One capability, which an owner holds by role rather than by row.
- *
- * The same short-circuit every predicate above makes. An owner with no rows in
- * `ctr.admin_capabilities` still passes, so promoting somebody to owner never
- * has to remember to tick anything.
- */
-export function holdsCapability(
-  session: Scoped | null | undefined,
-  capability: Capability
-): boolean {
-  if (!session) return false;
-  if (session.role === "owner") return true;
-  return (session.capabilities ?? []).includes(capability);
-}
 
-/** May they open the enquiries screen? The only question that screen asks. */
-export function canReadEnquiries(session: Scoped | null | undefined): boolean {
-  return holdsCapability(session, "enquiries");
-}
 
-/**
- * Any reason at all to be in the console.
- *
- * `canSeeAnySite` was that question while a sport was the only thing anybody
- * could be given. An account holding nothing but the enquiries has no grant on
- * any site and would read as having nothing to do here — which is how the root
- * redirect ends up showing "nothing assigned yet" to somebody who has been
- * assigned something.
- */
-export function canSeeAnything(session: Scoped | null | undefined): boolean {
-  if (!session) return false;
-  return canSeeAnySite(session) || CAPABILITIES.some((one) => holdsCapability(session, one));
-}
 
 export function canManageAdmins(session: Scoped | null | undefined): boolean {
   return session?.role === "owner";
 }
 
-/** Creating and deleting sports is the owner's, and only the owner's. */
-export function canManageSites(session: Scoped | null | undefined): boolean {
-  return session?.role === "owner";
-}
 
 /* ───────────────────────────── Normalising ──────────────────────────────── */
 
@@ -353,20 +288,6 @@ export function normaliseGrants(value: unknown): Grant[] {
   return out;
 }
 
-/**
- * Capabilities as stored, made safe to interpret.
- *
- * Same rule as `normaliseGrants`: an unrecognised one is dropped rather than
- * carried, so retiring a capability stops being an access grant the moment it
- * stops being a capability. Returned in the order `CAPABILITIES` declares, with
- * duplicates collapsed, so two accounts holding the same set compare equal —
- * which is what the editor's dirty check relies on.
- */
-export function normaliseCapabilities(value: unknown): Capability[] {
-  if (!Array.isArray(value)) return [];
-  const wanted = new Set(value.filter((entry): entry is string => typeof entry === "string"));
-  return CAPABILITIES.filter((capability) => wanted.has(capability));
-}
 
 /** A module list from a form, in a fixed order and with the unknown dropped. */
 export function normaliseGrantModules(value: unknown): GrantModule[] {

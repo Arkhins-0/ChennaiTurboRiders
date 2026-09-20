@@ -37,29 +37,22 @@ import { useSite, withSite } from "@/admin/components/SiteScope";
 
 /**
  * The route each kind publishes under. The SPORT in front of it comes from the
- * surrounding scope — an address is `/incrc/deck/<slug>`, and this component is
+ * surrounding scope — an address is `/news/<slug>`, and this component is
  * used on every sport's screens.
  */
 const ROUTE: Record<SlugKind, string> = {
-  form: "register",
-  deck: "deck",
-  article: "articles",
-  // `calendar`, not `events`: the public word for the season is the calendar,
-  // which is what the reserved-slug list in 0012 already holds. `events` is the
-  // admin screen, where the noun is the record.
-  event: "calendar",
+  article: "news",
+  // A round has no page of its own on this site — the calendar is one page —
+  // so its address is where it is listed. See `eventHref` in src/lib/events.ts.
+  event: "schedule",
 };
 const THING: Record<SlugKind, string> = {
-  form: "form",
-  deck: "deck",
   article: "article",
   event: "event",
 };
 
 /** What an address of this kind tends to look like, when nothing suggests one. */
 const PLACEHOLDER: Record<SlugKind, string> = {
-  form: "2026-entry",
-  deck: "entry-pack",
   article: "season-opener",
   event: "round-01",
 };
@@ -110,7 +103,7 @@ export function SlugField({
   // The sport this screen belongs to. Every write below names it, so the
   // server guards the right one — see SiteScope.
   const site = useSite();
-  /* Where this record publishes: `/incrc/deck/`, `/articles/` on the root. */
+  /* Where this record publishes: `/news/` for an article. */
   const prefix = `${siteHref(site)}/${ROUTE[kind]}/`;
   const [state, setState] = useState<SlugState>({ kind: "empty" });
   const [busy, setBusy] = useState(false);

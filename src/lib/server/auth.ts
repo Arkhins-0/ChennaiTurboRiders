@@ -6,11 +6,9 @@ import { promisify } from "node:util";
 import { cookies } from "next/headers";
 import { getSql } from "@/lib/server/db";
 import {
-  normaliseCapabilities,
   normaliseGrants,
   normaliseRole,
   type AdminRole,
-  type Capability,
   type Grant,
 } from "@/lib/roles";
 
@@ -89,12 +87,6 @@ export type AdminSession = {
    * join here and saves a query inside a predicate the browser also runs.
    */
   grants: Grant[];
-  /**
-   * What they hold that names no site. See `Capability` in roles.ts — the
-   * enquiries arrive from every page and belong to no sport, so they cannot be
-   * expressed as a grant.
-   */
-  capabilities: Capability[];
 };
 
 /**
@@ -115,10 +107,7 @@ export const getSession = cache(async (): Promise<AdminSession | null> => {
                        ORDER BY site.sort_order, g.module), '[]'::jsonb)
                 FROM ctr.admin_grants g
                 JOIN ctr.sites site ON site.id = g.site_id
-               WHERE g.admin_id = a.id) AS grants,
-             (SELECT coalesce(jsonb_agg(c.capability ORDER BY c.capability), '[]'::jsonb)
-                FROM ctr.admin_capabilities c
-               WHERE c.admin_id = a.id) AS capabilities
+               WHERE g.admin_id = a.id) AS grants
         FROM ctr.sessions s
         JOIN ctr.admins a ON a.id = s.admin_id
        WHERE s.token_hash = ${hashToken(token)}
@@ -128,7 +117,6 @@ export const getSession = cache(async (): Promise<AdminSession | null> => {
       username: string;
       role: unknown;
       grants: unknown;
-      capabilities: unknown;
     }[];
 
     const row = rows[0];
@@ -143,7 +131,6 @@ export const getSession = cache(async (): Promise<AdminSession | null> => {
       username: row.username,
       role: normaliseRole(row.role),
       grants: normaliseGrants(row.grants),
-      capabilities: normaliseCapabilities(row.capabilities),
     };
   } catch {
     // A database that is down reads as "not signed in", which sends the visitor

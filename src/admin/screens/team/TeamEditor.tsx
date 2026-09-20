@@ -48,12 +48,13 @@ export function TeamEditor({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  /** Only the modules this sport actually has, plus the three every site has. */
+  /** Only the modules this sport actually has, plus the four every site has. */
   const offered: GrantModule[] = GRANT_MODULES.filter(
     (module) =>
       module !== "*" &&
-      (module === "page" ||
-        module === "chrome" ||
+      (module === "identity" ||
+        module === "drivers" ||
+        module === "sponsors" ||
         module === "team" ||
         (site.modules as readonly string[]).includes(module))
   );

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DriverPoster } from "@/components/site/DriverPoster";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
-import { drivers } from "@/data/site-data";
+import { siteDrivers } from "@/lib/server/siteContent";
 
 export const metadata: Metadata = {
   title: "Drivers",
@@ -14,7 +14,9 @@ const groups = [
   { key: "F4", label: "F4 Indian Championship" },
 ];
 
-export default function DriversPage() {
+export default async function DriversPage() {
+  const drivers = await siteDrivers();
+
   return (
     <>
       <PageHeader

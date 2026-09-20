@@ -6,9 +6,7 @@ import { canBrowseFolder, canWriteFolder } from "@/lib/mediaPaths";
 import {
   canEdit,
   canManageAdmins,
-  canManageSites,
   canManageTeam,
-  canReadEnquiries,
   canSeeAnySite,
   canSeeSite,
   isSiteModule,
@@ -16,8 +14,7 @@ import {
   type Scoped,
 } from "@/lib/roles";
 import { getSession, type AdminSession } from "@/lib/server/auth";
-import { getFormSiteId } from "@/lib/server/formsRepo";
-import { getRootSite, getSiteById, getSiteBySlug } from "@/lib/server/sitesRepo";
+import { getSiteBySlug } from "@/lib/server/sitesRepo";
 import { hasModule, type Site } from "@/lib/sites";
 
 /**
@@ -140,26 +137,6 @@ export async function guardRequestSite(
   return guardSiteSlug(slug, module);
 }
 
-/**
- * The ROOT site, guarded. What the landing page's own screens ask.
- *
- * Spelled out rather than expressed as `guardRequestSite` with `site=landing`,
- * because the landing page is not a sport somebody picks from a switcher — it
- * is the one site that always exists, and its screens have nothing to name.
- */
-export async function guardRootSite(
-  module: GrantModule
-): Promise<{ denied: NextResponse } | { denied: null; site: Site }> {
-  const session = await getSession();
-  if (!session) return { denied: NextResponse.json(NOT_SIGNED_IN, { status: 401 }) };
-
-  const site = await getRootSite();
-  if (!canEdit(session, site.id, module)) {
-    return { denied: NextResponse.json(NOT_ALLOWED, { status: 403 }) };
-  }
-
-  return { denied: null, site };
-}
 
 /**
  * Any reach at all, into anything. The outer door to the media library.
@@ -192,65 +169,18 @@ export async function guardFolder(
   );
 }
 
-/**
- * One form, guarded by the sport that owns it.
- *
- * The `/api/admin/forms/[id]/…` routes cannot name their sport in the query
- * string the way the collection does — the id in the path already decides it,
- * and letting the caller also assert a site would be two answers to one
- * question, with the interesting case being when they disagree.
- *
- * A form that does not exist and a form that is not yours both get 404. From
- * outside they must not be distinguishable, or the id space is enumerable by
- * anyone with a grant on any sport.
- */
-export async function guardFormById(
-  formId: string
-): Promise<{ denied: NextResponse } | { denied: null; site: Site }> {
-  const session = await getSession();
-  if (!session) return { denied: NextResponse.json(NOT_SIGNED_IN, { status: 401 }) };
-
-  const missing = { denied: NextResponse.json({ error: "No such form." }, { status: 404 }) };
-
-  const siteId = await getFormSiteId(formId);
-  if (!siteId) return missing;
-  if (!canEdit(session, siteId, "forms")) return missing;
-
-  /*
-   * The site comes back as well as the verdict, for the same reason every other
-   * guard hands one over: the handler has to clear that site's cached pages
-   * afterwards, and looking it up a second time from the form is a second
-   * chance to look up a different one.
-   */
-  const site = await getSiteById(siteId);
-  return site ? { denied: null, site } : missing;
-}
 
 /** The co-admins of one sport. A `*` holder on that site, or the owner. */
 export function guardTeam(siteId: string): Promise<NextResponse | null> {
   return guard((session) => canManageTeam(session, siteId));
 }
 
-/** Creating, renaming and deleting sports. */
-export function guardSites(): Promise<NextResponse | null> {
-  return guard(canManageSites);
-}
 
 /** The accounts themselves. */
 export function guardOwner(): Promise<NextResponse | null> {
   return guard(canManageAdmins);
 }
 
-/**
- * The footer's messages.
- *
- * Takes no site, and that is not an omission — `ctr.enquiries` has no `site_id`
- * and the enquiries screen is one list across every sport. A guard that asked
- * for a site here would have to invent one.
- */
-export function guardEnquiries(): Promise<NextResponse | null> {
-  return guard(canReadEnquiries);
-}
 
 /* ─────────────────────────── Screens ──────────────────────────── */
 
@@ -328,12 +258,6 @@ export async function requireOwner(): Promise<AdminSession> {
   return session;
 }
 
-/** The enquiries screen. The owner, or an account given the capability. */
-export async function requireEnquiries(): Promise<AdminSession> {
-  const session = await getSession();
-  if (!session || !canReadEnquiries(session)) notFound();
-  return session;
-}
 
 /** Kept as a named export so nothing has to import `Scoped` from two places. */
 export type { Scoped };

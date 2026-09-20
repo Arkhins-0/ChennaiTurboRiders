@@ -357,17 +357,22 @@ export function trackSlug(track: Pick<Track, "id" | "name"> & { slug?: string })
   return slug || track.id;
 }
 
-/** Where a link to this circuit points — under the sport that runs it. */
+/*
+ * There is no page per record on this site — the calendar is one page, at
+ * /schedule — so every address below is that page. The builders stay because
+ * the sitemap and the revalidators go through them, and the day a record gets
+ * a page of its own is the day this changes in one place.
+ */
 export function trackHref(
   site: SiteRef,
-  track: Pick<Track, "id" | "name"> & { slug?: string }
+  _track: Pick<Track, "id" | "name"> & { slug?: string }
 ): string {
-  return sitePath(site, "circuits", trackSlug(track));
+  return sitePath(site, "schedule");
 }
 
 /** The index of this sport's circuits. */
 export function circuitsHref(site: SiteRef): string {
-  return sitePath(site, "circuits");
+  return sitePath(site, "schedule");
 }
 
 /** Slug first, then id — see `trackSlug` for why both are accepted. */

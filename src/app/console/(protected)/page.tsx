@@ -1,11 +1,5 @@
 import { redirect } from "next/navigation";
-import {
-  canManageAdmins,
-  canManageSites,
-  canReadEnquiries,
-  canSeeAnySite,
-  canSeeSite,
-} from "@/lib/roles";
+import { canManageAdmins, canSeeAnySite, canSeeSite } from "@/lib/roles";
 import { getSession } from "@/lib/server/auth";
 import { listSites } from "@/lib/server/sitesRepo";
 
@@ -27,20 +21,16 @@ export default async function AdminIndexPage() {
   const session = await getSession();
   const sites = await listSites();
 
+  /*
+   * The first screen of the first sport this account can open. The site's own
+   * address used to be the section-built landing page; there is no such page
+   * now, so the door is the identity screen.
+   */
   const mine = sites.find((site) => canSeeSite(session, site.id));
-  if (mine) redirect(`/site/${mine.slug}`);
+  if (mine) redirect(`/site/${mine.slug}/identity`);
 
-  if (canManageSites(session)) redirect("/sports");
   if (canManageAdmins(session)) redirect("/admins");
   if (canSeeAnySite(session)) redirect("/media");
-
-  /*
-   * Last, because it is the narrowest thing an account can hold: somebody given
-   * nothing but the enquiries has no sport, so every test above has already
-   * failed for them. Without this line they would land on the card below —
-   * "nothing assigned yet" — while holding the one screen they were given.
-   */
-  if (canReadEnquiries(session)) redirect("/enquiries");
 
   return (
     <div className="flex min-h-full items-center justify-center p-6">

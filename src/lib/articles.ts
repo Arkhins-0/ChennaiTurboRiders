@@ -168,12 +168,12 @@ export function isArticleId(value: unknown): value is string {
 
 /** Where a link to this article points — under the site that owns it. */
 export function articleHref(site: SiteRef, article: Pick<Article, "slug">): string {
-  return sitePath(site, "articles", article.slug);
+  return sitePath(site, "news", article.slug);
 }
 
 /** The index of this site's articles. */
 export function articlesHref(site: SiteRef): string {
-  return sitePath(site, "articles");
+  return sitePath(site, "news");
 }
 
 /** The slug in a stored article link of THIS site, or "" — see `slugUnder`. */

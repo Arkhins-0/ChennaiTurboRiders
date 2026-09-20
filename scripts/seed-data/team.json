@@ -1,0 +1,415 @@
+{
+  "profile": {
+    "name": "Chennai Turbo Riders",
+    "abbreviation": "CTR",
+    "tagline": "Born to Race. Built to Win.",
+    "description": "India's Premier Formula 4 Racing Team competing at the highest level of Indian motorsport.",
+    "founded": 2022,
+    "current_season": 4,
+    "headquarters": "#1, 1st Main Road, Kasthuri Bai Nagar, Adayar, Chennai - 600020",
+    "championship": "Indian Racing League (IRL)",
+    "official_website": "https://www.chennaiturboriders.racing",
+    "contact_email": "info@chennaiturboriders.in",
+    "contact_phone": "+91 95000 16999",
+    "contact_address": "#1, 1st Main Road, Kasthuri Bai Nagar, Adayar, Chennai - 600020",
+    "contact_map_embed": "",
+    "instagram_url": "https://www.instagram.com/chennaiturboriders/",
+    "facebook_url": "https://www.facebook.com/chennaiturboriders",
+    "twitter_url": "https://twitter.com/chennaiturbo",
+    "youtube_url": "https://www.youtube.com/@chennaiturboriders",
+    "principal_name": "Keerthivasan S",
+    "principal_title": "Team Principal",
+    "principal_image": "/images/team/keerthivasan.png",
+    "hero_title": "CHENNAI TURBO RIDERS",
+    "hero_subtitle": "BORN TO RACE. BUILT TO WIN.",
+    "hero_description": "India's Premier Formula 4 Racing Team",
+    "hero_video": "/video/background.mp4",
+    "about_title": "ABOUT THE TEAM",
+    "about_subtitle": "RACING EXCELLENCE SINCE 2022",
+    "about_body_1": "Chennai Turbo Riders is India's premier Formula 4 racing team, founded in 2022 with a singular mission — to put Indian motorsport on the global map. Based in Chennai, Tamil Nadu, CTR competes in the Indian Racing League with a diverse roster of talented drivers from India and around the world.",
+    "about_body_2": "Our team combines cutting-edge engineering with raw racing talent, creating a powerhouse that consistently challenges at the front of the grid. From the streets of Goa to the circuits of Mumbai, CTR delivers heart-pounding performance every race weekend.",
+    "about_image": "/images/team/Team.jpg"
+  },
+  "hero_stats": [
+    {
+      "value": "8",
+      "label": "DRIVERS"
+    },
+    {
+      "value": "S4",
+      "label": "SEASON"
+    },
+    {
+      "value": "2",
+      "label": "RACES"
+    },
+    {
+      "value": "11",
+      "label": "PODIUMS"
+    }
+  ],
+  "about_stats": [
+    {
+      "value": "4",
+      "label": "Seasons"
+    },
+    {
+      "value": "8",
+      "label": "Drivers"
+    },
+    {
+      "value": "11+",
+      "label": "Race Wins"
+    },
+    {
+      "value": "30+",
+      "label": "Podiums"
+    }
+  ],
+  "car": {
+    "name": "GEN-2 F4",
+    "tagline": "ENGINEERED FOR SPEED. BUILT FOR VICTORY.",
+    "year": 2025,
+    "description": "The Gen-2 F4 is a purpose-built formula racing machine that delivers exceptional performance on both permanent circuits and street tracks. Its lightweight carbon fiber construction and aerodynamic design make it one of the most competitive cars in the Indian Racing League.",
+    "image": "/images/car/hero.jpg",
+    "image_2": "/images/car/hero2.jpg",
+    "image_3": "/images/car/hero3.jpg"
+  },
+  "car_specs": [
+    {
+      "label": "Engine",
+      "value": "Turbo 1.4L"
+    },
+    {
+      "label": "Power",
+      "value": "160 HP"
+    },
+    {
+      "label": "Weight",
+      "value": "570 kg"
+    },
+    {
+      "label": "Top Speed",
+      "value": "230 km/h"
+    },
+    {
+      "label": "0-100 km/h",
+      "value": "3.8s"
+    },
+    {
+      "label": "Chassis",
+      "value": "Carbon Fiber"
+    },
+    {
+      "label": "Gearbox",
+      "value": "6-Speed Sequential"
+    },
+    {
+      "label": "Brakes",
+      "value": "Brembo Carbon"
+    }
+  ],
+  "drivers": [
+    {
+      "slug": "aqil-alibhai",
+      "first_name": "Aqil",
+      "last_name": "Alibhai",
+      "nationality": "India",
+      "country_code": "IN",
+      "flag_emoji": "🇮🇳",
+      "championship": "IRL",
+      "car": "Wolf GB08",
+      "number": 7,
+      "date_of_birth": "2003-05-12",
+      "height": "1.75 M",
+      "weight": "68 KG",
+      "image": "/images/drivers/AQIL_ALIBHAI.png",
+      "hero_image": "/images/drivers/AQIL_ALIBHAI.png",
+      "quote": "Every lap is a chance to prove myself and represent Chennai on the global stage.",
+      "biography": "Aqil Alibhai is a talented young Indian driver who has made a name for himself in national karting championships. With his transition to formula racing with Chennai Turbo Riders, he brings fresh energy and determination to compete at the highest level in the Indian Racing League.",
+      "race_wins": 2,
+      "pole_positions": 3,
+      "grands_prix": 18,
+      "podiums": 6,
+      "fastest_laps": 2,
+      "points": 124,
+      "highlights": [
+        "National Karting Champion 2022",
+        "IRL Rookie of the Year contender",
+        "Fastest lap at Madras International Circuit"
+      ]
+    },
+    {
+      "slug": "shibin-yousaf",
+      "first_name": "Shibin",
+      "last_name": "Yousaf",
+      "nationality": "India",
+      "country_code": "IN",
+      "flag_emoji": "🇮🇳",
+      "championship": "IRL",
+      "car": "Wolf GB08",
+      "number": 23,
+      "date_of_birth": "2002-08-25",
+      "height": "1.73 M",
+      "weight": "66 KG",
+      "image": "/images/drivers/SHIBIN_YOUSAF.png",
+      "hero_image": "/images/drivers/SHIBIN_YOUSAF.png",
+      "quote": "Precision and speed - that's what wins races. I give 100% every single time.",
+      "biography": "Shibin Yousaf is a rising star in Indian motorsport with a background in single-seater racing. His technical understanding of the car and smooth driving style make him a formidable competitor on both street and permanent circuits.",
+      "race_wins": 3,
+      "pole_positions": 4,
+      "grands_prix": 22,
+      "podiums": 8,
+      "fastest_laps": 3,
+      "points": 156,
+      "highlights": [
+        "F4 Indian Championship podium finisher",
+        "Multiple IRL podiums",
+        "Known for exceptional qualifying pace"
+      ]
+    },
+    {
+      "slug": "tijil-rao",
+      "first_name": "Tijil",
+      "last_name": "Rao",
+      "nationality": "India",
+      "country_code": "IN",
+      "flag_emoji": "🇮🇳",
+      "championship": "IRL",
+      "car": "Wolf GB08",
+      "number": 11,
+      "date_of_birth": "2001-12-08",
+      "height": "1.76 M",
+      "weight": "70 KG",
+      "image": "/images/drivers/TIJIL_RAO.png",
+      "hero_image": "/images/drivers/TIJIL_RAO.png",
+      "quote": "The track is where I belong. Every race is a step closer to championship glory.",
+      "biography": "Tijil Rao brings experience and consistency to Chennai Turbo Riders. With years of competitive racing under his belt, he has developed into a reliable points scorer and a driver who excels in high-pressure situations.",
+      "race_wins": 4,
+      "pole_positions": 2,
+      "grands_prix": 28,
+      "podiums": 11,
+      "fastest_laps": 4,
+      "points": 198,
+      "highlights": [
+        "IRL Season 4 podium finisher",
+        "Consistent top-10 performances",
+        "Expert in wet weather conditions"
+      ]
+    },
+    {
+      "slug": "laura-camps-torras",
+      "first_name": "Laura",
+      "last_name": "Camps Torras",
+      "nationality": "Spain",
+      "country_code": "ES",
+      "flag_emoji": "🇪🇸",
+      "championship": "IRL",
+      "car": "Wolf GB08",
+      "number": 19,
+      "date_of_birth": "2000-04-17",
+      "height": "1.68 M",
+      "weight": "58 KG",
+      "image": "/images/drivers/LAURA_CAMPS_TORRAS.png",
+      "hero_image": "/images/drivers/LAURA_CAMPS_TORRAS.png",
+      "quote": "Breaking barriers and proving that talent has no gender. I race to inspire.",
+      "biography": "Laura Camps Torras is a Spanish racing driver who brings international experience to Chennai Turbo Riders. Her aggressive yet calculated racing style and technical feedback have made her an invaluable asset to the team's development program.",
+      "race_wins": 1,
+      "pole_positions": 2,
+      "grands_prix": 20,
+      "podiums": 5,
+      "fastest_laps": 2,
+      "points": 98,
+      "highlights": [
+        "European F4 Championship competitor",
+        "First Spanish woman in IRL",
+        "Rising star in Asian motorsport"
+      ]
+    },
+    {
+      "slug": "viswas-vijayaraj",
+      "first_name": "Viswas",
+      "last_name": "Vijayaraj",
+      "nationality": "India",
+      "country_code": "IN",
+      "flag_emoji": "🇮🇳",
+      "championship": "IRL",
+      "car": "Wolf GB08",
+      "number": 44,
+      "date_of_birth": "2003-01-30",
+      "height": "1.74 M",
+      "weight": "67 KG",
+      "image": "/images/drivers/VISWAS_VIJAYARAJ.png",
+      "hero_image": "/images/drivers/VISWAS_VIJAYARAJ.png",
+      "quote": "Racing is in my DNA. I'm here to win and make Chennai proud.",
+      "biography": "Viswas Vijayaraj is a dynamic young driver who has quickly made his mark in the Indian Racing League. His fearless approach and natural racing instincts have earned him respect from competitors and fans alike.",
+      "race_wins": 1,
+      "pole_positions": 1,
+      "grands_prix": 16,
+      "podiums": 4,
+      "fastest_laps": 1,
+      "points": 86,
+      "highlights": [
+        "IRL Season 4 breakthrough performer",
+        "Chennai local racing hero",
+        "Youngest podium finisher for CTR"
+      ]
+    },
+    {
+      "slug": "shane-chandaria",
+      "first_name": "Shane",
+      "last_name": "Chandaria",
+      "nationality": "India",
+      "country_code": "IN",
+      "flag_emoji": "🇮🇳",
+      "championship": "F4",
+      "car": "Formula 4",
+      "number": 5,
+      "date_of_birth": "2005-03-15",
+      "height": "1.72 M",
+      "weight": "65 KG",
+      "image": "/images/drivers/SHANE_CHANDARIA.png",
+      "hero_image": "/images/drivers/SHANE_CHANDARIA.png",
+      "quote": "Formula 4 is where champions are made. I'm ready for the challenge.",
+      "biography": "Shane Chandaria is a promising young talent competing in the Indian F4 Championship with Chennai Turbo Riders. His dedication and natural speed make him a driver to watch in the junior formula category.",
+      "race_wins": 0,
+      "pole_positions": 0,
+      "grands_prix": 8,
+      "podiums": 2,
+      "fastest_laps": 1,
+      "points": 42,
+      "highlights": [
+        "F4 Indian Championship competitor",
+        "Multiple podium finishes",
+        "Rising star in junior formula racing"
+      ]
+    },
+    {
+      "slug": "veer-sheth",
+      "first_name": "Veer",
+      "last_name": "Sheth",
+      "nationality": "India",
+      "country_code": "IN",
+      "flag_emoji": "🇮🇳",
+      "championship": "F4",
+      "car": "Formula 4",
+      "number": 8,
+      "date_of_birth": "2006-07-22",
+      "height": "1.70 M",
+      "weight": "63 KG",
+      "image": "/images/drivers/VEER_SHETH.png",
+      "hero_image": "/images/drivers/VEER_SHETH.png",
+      "quote": "Every race is a learning experience. I'm here to grow and compete.",
+      "biography": "Veer Sheth is a young Indian driver making his mark in the F4 Championship. His smooth driving style and technical approach showcase his potential for a bright future in motorsport.",
+      "race_wins": 0,
+      "pole_positions": 1,
+      "grands_prix": 8,
+      "podiums": 1,
+      "fastest_laps": 0,
+      "points": 35,
+      "highlights": [
+        "F4 Indian Championship rookie",
+        "First pole position achievement",
+        "Consistent points scorer"
+      ]
+    },
+    {
+      "slug": "kareen-kaur",
+      "first_name": "Kareen",
+      "last_name": "Kaur",
+      "nationality": "India",
+      "country_code": "IN",
+      "flag_emoji": "🇮🇳",
+      "championship": "F4",
+      "car": "Formula 4",
+      "number": 14,
+      "date_of_birth": "2005-11-08",
+      "height": "1.65 M",
+      "weight": "55 KG",
+      "image": "/images/drivers/KAREEN_KAUR.png",
+      "hero_image": "/images/drivers/KAREEN_KAUR.png",
+      "quote": "Breaking barriers and racing towards my dreams with determination.",
+      "biography": "Kareen Kaur is a talented female driver competing in the Indian F4 Championship. Her presence in the championship represents a new era of diversity in Indian motorsport and inspires young racers across the country.",
+      "race_wins": 0,
+      "pole_positions": 0,
+      "grands_prix": 8,
+      "podiums": 0,
+      "fastest_laps": 0,
+      "points": 18,
+      "highlights": [
+        "F4 Indian Championship competitor",
+        "Pioneering female driver in Indian F4",
+        "Strong race pace and improvement"
+      ]
+    }
+  ],
+  "sponsors": [
+    {
+      "tier": "title",
+      "slug": "bharath-college",
+      "name": "Bharath College",
+      "logo": "/images/sponsors/Bharath_College_logo.png",
+      "full_logo": "/images/sponsors/Bharath_College_name.png",
+      "website": "https://bharathuniv.ac.in/",
+      "description": "Leading educational institution supporting motorsport excellence and youth development."
+    },
+    {
+      "tier": "principal",
+      "slug": "medical-college",
+      "name": "Bhaarath Medical College and Hospital",
+      "logo": "/images/partners/Medical_College_full.png",
+      "full_logo": "/images/partners/Medical_College_full.png",
+      "website": "https://www.bmch.ac.in/",
+      "description": "Premier medical institution partnering with CTR for healthcare and safety initiatives."
+    },
+    {
+      "tier": "official",
+      "slug": "fmsci",
+      "name": "FMSCI",
+      "logo": "/images/sponsors/fmsci_full.png",
+      "full_logo": "",
+      "website": "https://www.fmsci.co.in/",
+      "description": "Federation of Motor Sports Clubs of India - governing body for motorsport in India."
+    },
+    {
+      "tier": "official",
+      "slug": "fia",
+      "name": "FIA",
+      "logo": "/images/sponsors/FiA.png",
+      "full_logo": "",
+      "website": "https://www.fia.com/",
+      "description": "Fédération Internationale de l'Automobile - international governing body for motorsport."
+    },
+    {
+      "tier": "official",
+      "slug": "f4",
+      "name": "F4 Indian Championship",
+      "logo": "/images/sponsors/F4_logo.png",
+      "full_logo": "",
+      "website": "https://www.fiaformula4.com/",
+      "description": "F4 Indian Championship - certified by FIA, providing the perfect platform for young drivers."
+    }
+  ],
+  "achievements": [
+    {
+      "year": "2025",
+      "title": "Season 3 Championship Contenders",
+      "description": "Multi-podium finish season with consistent top-5 results."
+    },
+    {
+      "year": "2024",
+      "title": "IRL Podium Breakthroughs",
+      "description": "Multiple podium finishes across the Indian Racing League calendar."
+    },
+    {
+      "year": "2023",
+      "title": "First Race Victory",
+      "description": "Historic first race win for Chennai Turbo Riders in the IRL."
+    },
+    {
+      "year": "2022",
+      "title": "Team Founded",
+      "description": "Chennai Turbo Riders established as India's newest Formula racing team."
+    }
+  ]
+}

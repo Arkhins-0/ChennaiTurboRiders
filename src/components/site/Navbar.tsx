@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { site, socialMedia } from "@/data/site-data";
 import { cn } from "@/lib/utils";
+import type { SiteConfig, SocialMedia } from "@/types/site";
 
 const links = [
   { href: "/", label: "Home" },
@@ -15,13 +15,6 @@ const links = [
   { href: "/schedule", label: "Calendar" },
   { href: "/news", label: "News" },
   { href: "/sponsors", label: "Partners" },
-];
-
-const socials = [
-  { href: socialMedia.instagram, label: "Instagram" },
-  { href: socialMedia.facebook, label: "Facebook" },
-  { href: socialMedia.twitter, label: "X" },
-  { href: socialMedia.youtube, label: "YouTube" },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -39,7 +32,25 @@ function isActive(pathname: string, href: string) {
  * On a phone the menu takes the whole screen: the six links as enormous
  * leaning lines, numbered, with the socials beneath.
  */
-export function Navbar() {
+export function Navbar({
+  site,
+  socialMedia,
+}: {
+  site: SiteConfig;
+  socialMedia: SocialMedia;
+}) {
+  /*
+   * Built per render rather than at module scope, and the blanks dropped: an
+   * empty address would otherwise draw a social link whose href is "", which
+   * is a link back to the page you are on. See the same filter in the footer.
+   */
+  const socials = [
+    { href: socialMedia.instagram, label: "Instagram" },
+    { href: socialMedia.facebook, label: "Facebook" },
+    { href: socialMedia.twitter, label: "X" },
+    { href: socialMedia.youtube, label: "YouTube" },
+  ].filter((s) => s.href);
+
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();

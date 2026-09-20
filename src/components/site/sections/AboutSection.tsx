@@ -3,9 +3,11 @@ import { ArrowUpRight } from "lucide-react";
 import { Counter } from "@/components/site/Counter";
 import { Reveal } from "@/components/site/Reveal";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { about, site, teamPrincipal } from "@/data/site-data";
+import { siteTeam } from "@/lib/server/siteContent";
 
-export function AboutSection() {
+export async function AboutSection() {
+  const { about, site, teamPrincipal } = await siteTeam();
+
   return (
     <section id="about" className="relative overflow-hidden py-24 md:py-32">
       <div className="hud-grid pointer-events-none absolute inset-0" />

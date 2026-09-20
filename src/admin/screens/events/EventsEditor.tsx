@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Chrome } from "@/lib/chrome";
 import {
   BLANK_EVENT,
   EVENT_STATUS_LABELS,
   eventName,
   type CtrEvent,
 } from "@/lib/events";
-import type { FormSummary } from "@/lib/forms";
 import { folderForEntity, folderForModule } from "@/lib/mediaPaths";
 import { eventDateLabel } from "@/lib/raceDates";
 import type { SlugHolder } from "@/lib/slug";
@@ -51,20 +49,12 @@ const ORDER_SAVE_DELAY = 500;
 export function EventsEditor({
   initialEvents,
   tracks,
-  forms,
-  chrome,
   siteUrl,
-  year,
 }: {
   initialEvents: CtrEvent[];
   /** This sport's circuits, for the picker and the preview's photograph. */
   tracks: Track[];
-  /** This sport's entry forms, for the picker. */
-  forms: FormSummary[];
-  /** The header and footer the preview draws — this site's own. */
-  chrome: Chrome;
   siteUrl: string;
-  year: number;
 }) {
   // The sport this screen belongs to. Every write below names it, so the server
   // guards the right one — see SiteScope.
@@ -428,8 +418,6 @@ export function EventsEditor({
           <EventPreview
             event={adding ? null : active}
             tracks={tracks}
-            chrome={chrome}
-            year={year}
             className="hidden lg:block lg:min-w-0 lg:flex-1"
           />
 
@@ -502,7 +490,6 @@ export function EventsEditor({
                   <EventForm
                     event={active}
                     tracks={tracks}
-                    forms={forms}
                     siteUrl={siteUrl}
                     onChange={update}
                     onDelete={() => setConfirmingDelete(true)}

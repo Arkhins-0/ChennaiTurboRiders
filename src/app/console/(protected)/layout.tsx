@@ -35,7 +35,6 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
       username={session.username}
       role={session.role}
       grants={session.grants}
-      capabilities={session.capabilities}
       sites={sites}
     >
       {children}

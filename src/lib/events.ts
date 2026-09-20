@@ -101,8 +101,6 @@ export type CtrEvent = {
   city: string;
   /** ctr.tracks.id, or "". Brings the map, the length and the corner count. */
   track_id: string;
-  /** ctr.forms.id, or "". The entry form for this weekend. */
-  form_id: string;
 
   /** ISO `YYYY-MM-DD`, or "" when the weekend is not fixed. */
   date_from: string;
@@ -130,7 +128,6 @@ export const BLANK_EVENT: Omit<CtrEvent, "id" | "site_id"> = {
   venue: "",
   city: "",
   track_id: "",
-  form_id: "",
   date_from: "",
   date_to: "",
   dates: "",
@@ -159,7 +156,7 @@ export function summariseEvent(event: CtrEvent): EventSummary {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Same reasoning as the decks, forms and articles: a malformed id should 404. */
+/** Same reasoning as the articles: a malformed id should 404. */
 export function isEventId(value: unknown): value is string {
   return typeof value === "string" && UUID.test(value);
 }
@@ -172,13 +169,19 @@ export function isEventId(value: unknown): value is string {
  * list in migration 0012 already holds. The admin screen is `/site/<sport>/events`
  * because there the noun is the record.
  */
-export function eventHref(site: SiteRef, event: Pick<CtrEvent, "slug">): string {
-  return sitePath(site, "calendar", event.slug);
+/*
+ * There is no page per record on this site — the calendar is one page, at
+ * /schedule — so every address below is that page. The builders stay because
+ * the sitemap and the revalidators go through them, and the day a record gets
+ * a page of its own is the day this changes in one place.
+ */
+export function eventHref(site: SiteRef, _event: Pick<CtrEvent, "slug">): string {
+  return sitePath(site, "schedule");
 }
 
 /** The index of this site's season. */
 export function calendarHref(site: SiteRef): string {
-  return sitePath(site, "calendar");
+  return sitePath(site, "schedule");
 }
 
 /** The slug in a stored event link of THIS site, or "" — see `slugUnder`. */
@@ -272,7 +275,6 @@ export function normaliseEventInput(
     venue,
     city: optionalText(record.city, EVENT_LIMITS.city),
     track_id: optionalText(record.track_id, 40),
-    form_id: optionalText(record.form_id, 40),
     date_from: isoDate(record.date_from),
     date_to: isoDate(record.date_to),
     dates: optionalText(record.dates, EVENT_LIMITS.dates),

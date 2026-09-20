@@ -14,12 +14,15 @@
  *
  * Everything seeded lives in scripts/seed-data/*.json, one file per kind:
  *
- *   sports.json     → ctr.sports
  *   circuits.json   → ctr.tracks, ctr.track_links
- *   decks.json      → ctr.decks, ctr.slugs, ctr.deck_pages   (empty by default)
- *   events.json     → ctr.events, ctr.slugs
- *   landing.json    ┐
- *   incrc.json      ┴→ ctr.page_sections and the three tables promoted out of it
+ *   events.json     → ctr.events, ctr.seasons, ctr.slugs
+ *   team.json       → ctr.team_profile, ctr.team_stats, ctr.car, ctr.car_specs,
+ *                     ctr.drivers, ctr.driver_highlights, ctr.sponsors,
+ *                     ctr.achievements
+ *
+ * sports.json, decks.json, landing.json and incrc.json were seeds for tables
+ * that migration 0025 removed — the section-built pages and the sports cards
+ * of the platform this console was ported from, none of which this site drew.
  *
  * The sports and the circuits used to be array literals in this file, inherited
  * from scripts/schema.mjs when it was split up; the two page documents were
@@ -73,45 +76,9 @@ function load(name) {
   return JSON.parse(readFileSync(join(DATA, `${name}.json`), "utf8"));
 }
 
-/**
- * The landing and INCRC documents, in the row shape `writePage` writes — so the
- * console re-saving a page overwrites the seed with the same layout it read.
- * Generated once by scripts/export-seed-content.ts, since deleted. Edit the
- * JSON; there is nothing left to keep it in step with.
- */
-const PAGE_CONTENT = ["landing", "incrc"].map(load);
 
-const SEED_SPORTS = load("sports");
 const SEED_TRACKS = load("circuits");
 
-/**
- * The decks — a TEMPLATE in the repo, not real content.
- *
- * A deck is a scanned document (an entry pack, the regulations, a sponsorship
- * brief) and every page of it is a file in the media bucket. There is no
- * plausible starting set: a deck belongs to whoever made it, so what ships here
- * is one entry with the right shape and obviously wrong values, to be edited
- * rather than to be used.
- *
- * It is `"status": "draft"` on purpose, and that is the safety catch. A draft is
- * not on the internet: `/deck/<slug>` does not serve it and `listDeckSummaries`
- * filters it out, so a template accidentally seeded into a real database is
- * invisible until somebody deliberately publishes it. Change that word last.
- *
- *   name          What it is called. Printed above the pages when show_heading.
- *   slug          The address — /deck/<slug>. Lower case, hyphens, unique.
- *   status        "draft" or "published". Only published is public.
- *   blurb         One line, under the heading and on cards that link to it.
- *   show_heading  false when page one is already a cover carrying the title.
- *   sort_order    Ascending. Ties break on name.
- *   pages         In order. `url` is the image; `alt` blank falls back to
- *                 "<name>, page N".
- *
- * Adding a deck here is only half of putting it on /incrc — the page picks
- * which decks it shows, by slug, in the `decks` section of incrc.json. See the
- * note on seedPageContent.
- */
-const SEED_DECKS = load("decks");
 
 /**
  * The season, as rows of ctr.events.
@@ -124,6 +91,27 @@ const SEED_DECKS = load("decks");
  * in this same run.
  */
 const SEED_EVENTS = load("events");
+
+/**
+ * The team's own content, as rows of the five tables migration 0024 created.
+ *
+ * This file IS src/data/site-data.json, rewritten into the row shapes and moved
+ * here. That file was the public site's only source of content: fourteen
+ * components imported it directly, so the site could not be edited without a
+ * deploy. 0024 made it a schema and this makes it a seed, which is the split
+ * every other kind here already has — the shape is a migration, the starting
+ * values are a file beside this script.
+ *
+ * Unlike the decks, this is REAL content rather than a template: it is what the
+ * site has served since it launched, so a fresh install that runs the seed
+ * comes up looking like production rather than blank.
+ *
+ * `slug` is carried for the drivers and the sponsors rather than derived. The
+ * JSON's `id` — "aqil-alibhai" — was already the address the site served, and
+ * re-deriving it from the name here would quietly change any of them whose
+ * spelling did not round-trip through `slugify`.
+ */
+const SEED_TEAM = load("team");
 
 if (!process.env.DATABASE_URL) {
   console.error("DATABASE_URL is not set. Make sure .env exists in the project root.");
@@ -154,26 +142,6 @@ async function sportSiteId() {
   return rows[0].id;
 }
 
-/*
- * Schema-qualified, unlike the application. The app relies on the search_path
- * 0001 sets on the database, which is the right trade for a hundred queries; a
- * setup script that may be the first thing ever run against a database is better
- * off saying where it means.
- */
-async function seedSports() {
-  const [{ count }] = await sql`SELECT count(*)::int AS count FROM ctr.sports`;
-  if (count > 0) return 0;
-
-  for (const sport of SEED_SPORTS) {
-    await sql`
-      INSERT INTO ctr.sports (title, text, details, logo_url, photo_url, href, sort_order)
-      VALUES (${sport.title}, ${sport.text}, ${sport.details}, ${sport.logo_url},
-              ${sport.photo_url}, ${sport.href}, ${sport.sort_order})
-    `;
-  }
-
-  return SEED_SPORTS.length;
-}
 
 async function seedTracks(siteId) {
   const [{ count }] = await sql`SELECT count(*)::int AS count FROM ctr.tracks`;
@@ -215,55 +183,6 @@ async function seedTracks(siteId) {
   return SEED_TRACKS.length;
 }
 
-/**
- * The decks, and the two tables that hang off each one.
- *
- * A deck is three writes, not one — `0008` dropped `decks.slug` and
- * `decks.pages`, so the address lives in the slug registry and the pages in
- * their own table. This does by hand what `insertDeck` in decksRepo does
- * through `writeSlugs` and `writePages`; the repo cannot be imported here
- * because it is TypeScript and reads its connection from the app's own config.
- *
- * `decks.json` is an empty array in the repo, so on a normal install this does
- * nothing at all — see the note on SEED_DECKS. It still guards on the table
- * being empty, because the day somebody fills the file in is the day this must
- * not run over decks that already exist.
- */
-async function seedDecks(siteId) {
-  if (SEED_DECKS.length === 0) return 0;
-
-  const [{ count }] = await sql`SELECT count(*)::int AS count FROM ctr.decks`;
-  if (count > 0) return 0;
-
-  for (const deck of SEED_DECKS) {
-    const [{ id }] = await sql`
-      INSERT INTO ctr.decks (site_id, name, status, blurb, show_heading, sort_order)
-      VALUES (${siteId}, ${deck.name}, ${deck.status ?? "draft"}, ${deck.blurb ?? ""},
-              ${deck.show_heading ?? true}, ${deck.sort_order ?? 0})
-      RETURNING id
-    `;
-
-    // The address. `is_current` true is what makes it the one /deck/<slug>
-    // answers to; a seeded deck has no former addresses to redirect from.
-    if (deck.slug) {
-      await sql`
-        INSERT INTO ctr.slugs (site_id, entity_type, slug, entity_id, is_current)
-        VALUES (${siteId}, 'deck', ${deck.slug}, ${id}, true)
-      `;
-    }
-
-    // `position` is 1-based, matching what the admin writer produces — and the
-    // table's own CHECK (position >= 1) refuses anything else.
-    for (const [index, page] of (deck.pages ?? []).entries()) {
-      await sql`
-        INSERT INTO ctr.deck_pages (deck_id, position, url, alt)
-        VALUES (${id}, ${index + 1}, ${page.url}, ${page.alt ?? ""})
-      `;
-    }
-  }
-
-  return SEED_DECKS.length;
-}
 
 /**
  * The season, as rows with addresses of their own.
@@ -278,24 +197,95 @@ async function seedDecks(siteId) {
  * in this same run. Both resolve to NULL when nothing matches, which is exactly
  * what the card and the page already handle: no photograph, and no entry button.
  */
+/**
+ * The season a seeded round belongs to, made if it is not there yet.
+ *
+ * ── Why this exists ───────────────────────────────────────────────────────
+ *
+ * Migration 0021 put every round under a season and finished with
+ * `ALTER COLUMN season_id SET NOT NULL`. It backfilled the rounds that existed
+ * at the time, which is every round in production — and nothing taught THIS
+ * script about the new column, so `npm run db:seed` on a freshly migrated
+ * database failed on the first round with
+ *
+ *     null value in column "season_id" of relation "events"
+ *
+ * after having already written the sports, the circuits and the decks. A seed
+ * that dies halfway is worse than one that refuses: the tables it did fill are
+ * now non-empty, so the guards at the top of each function make a second run a
+ * no-op and the database is stuck half-populated.
+ *
+ * The name, the slug, the status and the sort order are the ones 0021 mints, so
+ * a database that arrived here by migrating and one that arrived by seeding
+ * hold the same rows rather than two spellings of the same season.
+ */
+async function seasonFor(siteId, year) {
+  const name = `${year} Season`;
+
+  const existing = await sql`
+    SELECT id FROM ctr.seasons WHERE site_id = ${siteId} AND name = ${name}
+  `;
+
+  if (existing[0]) return existing[0].id;
+
+  const [{ id }] = await sql`
+    INSERT INTO ctr.seasons (site_id, name, status, sort_order)
+    VALUES (${siteId}, ${name}, 'published', ${year})
+    RETURNING id
+  `;
+
+  /*
+   * Seasons and rounds share one address space — see the note in 0021 — so the
+   * season takes its slug from ctr.slugs like everything else that publishes at
+   * one. `ON CONFLICT DO NOTHING`: a site that already has a `2026` slug keeps
+   * it, and the season is simply unaddressed rather than the seed failing.
+   */
+  await sql`
+    INSERT INTO ctr.slugs (site_id, entity_type, slug, entity_id, is_current)
+    VALUES (${siteId}, 'season', ${String(year)}, ${id}, true)
+    ON CONFLICT DO NOTHING
+  `;
+
+  return id;
+}
+
 async function seedEvents(siteId) {
   if (SEED_EVENTS.length === 0) return 0;
 
   const [{ count }] = await sql`SELECT count(*)::int AS count FROM ctr.events`;
   if (count > 0) return 0;
 
+  /*
+   * A round joins the season of its own year, which is the rule 0021 backfilled
+   * by. A round with no dates at all joins the earliest season there is, for
+   * the same reason 0021's last UPDATE does: `season_id` is NOT NULL, so it has
+   * to go somewhere, and the oldest season is where an undated fixture is least
+   * surprising.
+   */
+  const yearOf = (event) => {
+    const date = event.date_from || event.date_to || "";
+    const year = Number.parseInt(String(date).slice(0, 4), 10);
+    return Number.isFinite(year) ? year : 0;
+  };
+
+  const years = [...new Set(SEED_EVENTS.map(yearOf).filter(Boolean))].sort();
+  if (years.length === 0) years.push(new Date().getFullYear());
+
+  const seasons = new Map();
+  for (const year of years) seasons.set(year, await seasonFor(siteId, year));
+
+  const fallbackSeason = seasons.get(years[0]);
+
   for (const [index, event] of SEED_EVENTS.entries()) {
     const [{ id }] = await sql`
-      INSERT INTO ctr.events (site_id, round, title, subtitle, venue, city,
-                              track_id, form_id, date_from, date_to, dates, badge,
+      INSERT INTO ctr.events (site_id, season_id, round, title, subtitle, venue, city,
+                              track_id, date_from, date_to, dates, badge,
                               status, cover_image, sort_order)
       VALUES (
-        ${siteId}, ${event.round ?? ""}, ${event.title ?? ""}, ${event.subtitle ?? ""},
+        ${siteId}, ${seasons.get(yearOf(event)) ?? fallbackSeason},
+        ${event.round ?? ""}, ${event.title ?? ""}, ${event.subtitle ?? ""},
         ${event.venue ?? ""}, ${event.city ?? ""},
         (SELECT id FROM ctr.tracks WHERE site_id = ${siteId} AND slug = ${event.track_slug ?? ""}),
-        (SELECT s.entity_id FROM ctr.slugs s
-          WHERE s.site_id = ${siteId} AND s.entity_type = 'form'
-            AND s.slug = ${event.form_slug ?? ""} AND s.is_current),
         ${event.date_from || null}, ${event.date_to || null},
         ${event.dates ?? ""}, ${event.badge ?? ""},
         ${event.status ?? "draft"}, ${event.cover_image ?? ""},
@@ -381,160 +371,174 @@ async function seedEvents(siteId) {
  * to nobody and somebody has to pick.
  *
  */
-async function seedPageContent() {
-  const seeded = [];
+/**
+ * The profile, the car, the drivers, the sponsors and the achievements.
+ *
+ * ── Why the guard is the drivers and not each table ───────────────────────
+ *
+ * Every other seed here asks "is my table empty?" and skips if it is not. Two
+ * of these five tables cannot answer that: migration 0024 inserts a blank
+ * `team_profile` and a blank `car` for every site, so those are never empty and
+ * a per-table guard would skip them forever.
+ *
+ * So the whole group keys off ctr.drivers, which starts genuinely empty. A
+ * database with drivers has been seeded — or has had content added, which is
+ * the same thing for this purpose — and nothing here should run over it. A
+ * database with none gets all five, including the two blanks, which are UPDATEd
+ * rather than inserted because their rows already exist.
+ *
+ * The consequence worth stating: deleting every driver and re-running the seed
+ * WILL rewrite the profile and the car. That is the same bargain `seedSports`
+ * makes, and it is the right one for a script whose whole job is "make an empty
+ * database look like production".
+ */
+async function seedTeam(siteId) {
+  const [{ count }] = await sql`SELECT count(*)::int AS count FROM ctr.drivers`;
+  if (count > 0) return 0;
 
-  for (const page of PAGE_CONTENT) {
-    /*
-     * `page_key` in the JSON is the SITE's slug — 'landing' and 'incrc' were the
-     * two content keys before 0012 and are the two site slugs after it, by
-     * construction in that migration.
-     */
-    const key = page.page_key;
+  const p = SEED_TEAM.profile;
 
-    const pages = await sql`
-      SELECT p.id, p.kind FROM ctr.pages p
-        JOIN ctr.sites s ON s.id = p.site_id
-       WHERE s.slug = ${key} AND p.kind IN ('home', 'chrome')
-    `;
+  /*
+   * UPDATE, not INSERT: 0024 already made the row. `ON CONFLICT` would say the
+   * same thing and would also quietly create one for a site that has none,
+   * which is a state this script should report rather than repair.
+   */
+  await sql`
+    UPDATE ctr.team_profile SET
+      name = ${p.name}, abbreviation = ${p.abbreviation}, tagline = ${p.tagline},
+      description = ${p.description}, founded = ${p.founded},
+      current_season = ${p.current_season}, headquarters = ${p.headquarters},
+      championship = ${p.championship}, official_website = ${p.official_website},
+      contact_email = ${p.contact_email}, contact_phone = ${p.contact_phone},
+      contact_address = ${p.contact_address}, contact_map_embed = ${p.contact_map_embed},
+      instagram_url = ${p.instagram_url}, facebook_url = ${p.facebook_url},
+      twitter_url = ${p.twitter_url}, youtube_url = ${p.youtube_url},
+      principal_name = ${p.principal_name}, principal_title = ${p.principal_title},
+      principal_image = ${p.principal_image},
+      hero_title = ${p.hero_title}, hero_subtitle = ${p.hero_subtitle},
+      hero_description = ${p.hero_description}, hero_video = ${p.hero_video},
+      about_title = ${p.about_title}, about_subtitle = ${p.about_subtitle},
+      about_body_1 = ${p.about_body_1}, about_body_2 = ${p.about_body_2},
+      about_image = ${p.about_image}, updated_at = now()
+    WHERE site_id = ${siteId}
+  `;
 
-    const pageId = pages.find((row) => row.kind === "home")?.id;
-    if (!pageId) {
-      console.warn(`  no home page for the site "${key}" — skipped.`);
-      continue;
-    }
+  await sql`DELETE FROM ctr.team_stats WHERE site_id = ${siteId}`;
 
-    const [{ count }] = await sql`
-      SELECT count(*)::int AS count FROM ctr.page_sections WHERE page_id = ${pageId}
-    `;
-    if (count > 0) continue;
-
-    /*
-     * The header and footer go on their own page, which is what 0017 made them.
-     *
-     * They are in the JSON under `chrome` rather than mixed into `sections` for
-     * the same reason they are separate rows in the database: they are the
-     * site's, not the page's, and a fresh install that put them back on the home
-     * page would render every route with no header at all — the reader that
-     * assembles them looks at the chrome page and would find it empty.
-     *
-     * None of the six carries a promoted list, so this is a plain insert with no
-     * ids to mint and nothing to point at it.
-     */
-    const chromeId = pages.find((row) => row.kind === "chrome")?.id;
-    if (chromeId) {
-      for (const [index, section] of (page.chrome ?? []).entries()) {
-        await sql`
-          INSERT INTO ctr.page_sections (page_id, type, "position", visible, data)
-          VALUES (${chromeId}, ${section.type}, ${index + 1}, ${section.visible},
-                  ${JSON.stringify(section.data)}::jsonb)
-        `;
-      }
-    } else {
-      console.warn(`  no chrome page for the site "${key}" — its header was skipped.`);
-    }
-
-    /*
-     * A section id is minted HERE rather than by the database, because the
-     * promoted rows have to point at one and a seed cannot read back a uuid it
-     * has not written yet. Same reason the console mints them: see writePage.
-     */
-    const idOf = new Map();
-    for (const section of page.sections) idOf.set(section.type, randomUUID());
-
-    /*
-     * The banners are a section now (0015), and the JSON keeps them at the top
-     * level because that is where 0006 put them. One is created for a page that
-     * has any, at the front, exactly as the migration did.
-     */
-    const bannersId = page.banners.length > 0 ? randomUUID() : null;
-    let position = 0;
-
-    if (bannersId) {
+  for (const [placement, stats] of [
+    ["hero", SEED_TEAM.hero_stats],
+    ["about", SEED_TEAM.about_stats],
+  ]) {
+    for (const [index, stat] of stats.entries()) {
       await sql`
-        INSERT INTO ctr.page_sections (id, page_id, type, "position", visible, data)
-        VALUES (${bannersId}, ${pageId}, 'banners', ${(position += 1)}, true, '{}'::jsonb)
+        INSERT INTO ctr.team_stats (site_id, placement, position, value, label)
+        VALUES (${siteId}, ${placement}, ${index + 1}, ${stat.value}, ${stat.label})
       `;
     }
-
-    for (const section of page.sections) {
-      await sql`
-        INSERT INTO ctr.page_sections (id, page_id, type, "position", visible, data)
-        VALUES (${idOf.get(section.type)}, ${pageId}, ${section.type},
-                ${(position += 1)}, ${section.visible}, ${JSON.stringify(section.data)}::jsonb)
-      `;
-    }
-
-    for (const banner of page.banners) {
-      await sql`
-        INSERT INTO ctr.banners (section_id, banner_id, "position", template, image, fit,
-                                 focus, overlay, title, subtitle, cta_label, cta_href)
-        VALUES (${bannersId}, ${banner.banner_id}, ${banner.position}, ${banner.template},
-                ${banner.image}, ${banner.fit}, ${banner.focus}, ${banner.overlay},
-                ${banner.title}, ${banner.subtitle}, ${banner.cta_label}, ${banner.cta_href})
-      `;
-    }
-
-    for (const post of page.posts) {
-      await sql`
-        INSERT INTO ctr.posts (section_id, post_id, "position", image, category, date,
-                               title, excerpt, href)
-        VALUES (${idOf.get("posts")}, ${post.post_id}, ${post.position}, ${post.image},
-                ${post.category}, ${post.date}, ${post.title}, ${post.excerpt}, ${post.href})
-      `;
-    }
-
-    for (const partner of page.partners) {
-      await sql`
-        INSERT INTO ctr.partners (section_id, "position", name, logo, href)
-        VALUES (${idOf.get("intro")}, ${partner.position}, ${partner.name}, ${partner.logo},
-                ${partner.href})
-      `;
-    }
-
-    seeded.push(
-      `${key} (${page.sections.length} section(s), ` +
-        `${(page.chrome ?? []).length} chrome section(s), ${page.banners.length} banner(s)` +
-        (page.posts.length ? `, ${page.posts.length} post(s)` : "") +
-        (page.partners.length ? `, ${page.partners.length} partner(s)` : "") +
-        ")"
-    );
   }
 
-  return seeded;
+  const car = SEED_TEAM.car;
+  await sql`
+    UPDATE ctr.car SET
+      name = ${car.name}, tagline = ${car.tagline}, year = ${car.year},
+      description = ${car.description}, image = ${car.image},
+      image_2 = ${car.image_2}, image_3 = ${car.image_3}, updated_at = now()
+    WHERE site_id = ${siteId}
+  `;
+
+  await sql`DELETE FROM ctr.car_specs WHERE site_id = ${siteId}`;
+
+  for (const [index, spec] of SEED_TEAM.car_specs.entries()) {
+    await sql`
+      INSERT INTO ctr.car_specs (site_id, position, label, value)
+      VALUES (${siteId}, ${index + 1}, ${spec.label}, ${spec.value})
+    `;
+  }
+
+  for (const [index, d] of SEED_TEAM.drivers.entries()) {
+    const [{ id }] = await sql`
+      INSERT INTO ctr.drivers (
+        site_id, slug, first_name, last_name, nationality, country_code, flag_emoji,
+        championship, car, number, date_of_birth, height, weight, image, hero_image,
+        quote, biography, race_wins, pole_positions, grands_prix, podiums,
+        fastest_laps, points, sort_order
+      )
+      VALUES (
+        ${siteId}, ${d.slug}, ${d.first_name}, ${d.last_name}, ${d.nationality},
+        ${d.country_code}, ${d.flag_emoji}, ${d.championship ?? ""}, ${d.car ?? ""},
+        ${d.number ?? 0},
+        ${d.date_of_birth ?? null}::date,
+        ${d.height ?? ""}, ${d.weight ?? ""}, ${d.image ?? ""}, ${d.hero_image ?? ""},
+        ${d.quote ?? ""}, ${d.biography ?? ""},
+        ${d.race_wins ?? 0}, ${d.pole_positions ?? 0}, ${d.grands_prix ?? 0},
+        ${d.podiums ?? 0}, ${d.fastest_laps ?? 0}, ${d.points ?? 0},
+        ${(index + 1) * 10}
+      )
+      RETURNING id
+    `;
+
+    for (const [at, text] of (d.highlights ?? []).entries()) {
+      await sql`
+        INSERT INTO ctr.driver_highlights (driver_id, position, text)
+        VALUES (${id}, ${at + 1}, ${text})
+      `;
+    }
+  }
+
+  /*
+   * Ordered within a tier, not across the whole list.
+   *
+   * `sort_order` is compared only after `tier` — see the ORDER BY in
+   * sponsorsRepo — so numbering every sponsor 10, 20, 30… straight down the
+   * file would make the first technical partner sort above the second official
+   * one inside its own band. A counter per tier is what keeps the file's order
+   * and the board's order the same thing.
+   */
+  const withinTier = new Map();
+
+  for (const s of SEED_TEAM.sponsors) {
+    const position = (withinTier.get(s.tier) ?? 0) + 1;
+    withinTier.set(s.tier, position);
+
+    await sql`
+      INSERT INTO ctr.sponsors (site_id, slug, tier, name, logo, full_logo, website, description, sort_order)
+      VALUES (${siteId}, ${s.slug}, ${s.tier}, ${s.name}, ${s.logo ?? ""},
+              ${s.full_logo ?? ""}, ${s.website ?? ""}, ${s.description ?? ""},
+              ${position * 10})
+    `;
+  }
+
+  for (const [index, a] of SEED_TEAM.achievements.entries()) {
+    await sql`
+      INSERT INTO ctr.achievements (site_id, year, title, description, sort_order)
+      VALUES (${siteId}, ${a.year}, ${a.title}, ${a.description}, ${(index + 1) * 10})
+    `;
+  }
+
+  return SEED_TEAM.drivers.length;
 }
 
+
 try {
-  // Whose circuits, decks and events these are. Read once, before anything is
+  // Whose circuits, events and team these are. Read once, before anything is
   // written, so a database with no sites at all fails on the first line rather
   // than halfway through.
   const siteId = await sportSiteId();
 
-  const sports = await seedSports();
-  console.log(sports ? `Seeded ${sports} sports.` : "ctr.sports already has rows — nothing seeded.");
-
   const tracks = await seedTracks(siteId);
   console.log(tracks ? `Seeded ${tracks} circuits.` : "ctr.tracks already has rows — nothing seeded.");
-
-  const decks = await seedDecks(siteId);
-  console.log(
-    decks
-      ? `Seeded ${decks} deck(s). Edit scripts/seed-data/decks.json — the shipped entry is a template.`
-      : SEED_DECKS.length === 0
-        ? "scripts/seed-data/decks.json is empty — no decks to seed."
-        : "ctr.decks already has rows — nothing seeded."
-  );
 
   // After the circuits, so an event can resolve the track it names.
   const events = await seedEvents(siteId);
   console.log(events ? `Seeded ${events} event(s).` : "ctr.events already has rows — nothing seeded.");
 
-  const pages = await seedPageContent();
-  if (pages.length === 0) {
-    console.log("ctr.page_sections already has both pages — nothing seeded.");
-  } else {
-    for (const line of pages) console.log(`Seeded ${line}.`);
-  }
+  const team = await seedTeam(siteId);
+  console.log(
+    team
+      ? `Seeded the team profile, the car, ${team} drivers, the sponsors and the achievements.`
+      : "ctr.drivers already has rows — the team content was not seeded."
+  );
+
 } catch (error) {
   /*
    * 42P01 is undefined_table and nothing else. This used to match "does not

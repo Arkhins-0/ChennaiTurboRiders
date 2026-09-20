@@ -13,7 +13,7 @@ import { TrashIcon } from "@/admin/ui/icons";
 import { Field, Hint, Panel, Row } from "@/admin/components/Fields";
 import { Repeater } from "@/admin/components/Repeater";
 import { ImageField } from "@/admin/components/ImageField";
-import { TrackOutline } from "@/app/(site)/_shell/circuits/CircuitMap";
+import { TrackOutline } from "@/components/site/CircuitMap";
 import { Media } from "@/components/ui/Media";
 
 /**

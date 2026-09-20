@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { EventSummary } from "@/lib/events";
-import type { Chrome } from "@/lib/chrome";
 import { folderForEntity, folderForModule } from "@/lib/mediaPaths";
 import { BLANK_TRACK, trackSlug, type Track } from "@/lib/tracks";
 import { cn } from "@/lib/utils";
@@ -13,7 +11,6 @@ import { AdminRailSlot } from "@/admin/components/AdminShell";
 import { EditorToolbar } from "@/admin/components/EditorToolbar";
 import { SectionRail, type RailItem } from "@/admin/components/SectionRail";
 import { UploadFolder } from "@/admin/components/UploadFolder";
-import { CircuitPreview } from "@/admin/components/previews/CircuitPreview";
 import { TrackForm } from "./TrackForm";
 
 /**
@@ -39,19 +36,7 @@ import { TrackForm } from "./TrackForm";
 /** A drag crosses several rows; wait for it to settle before writing. */
 const ORDER_SAVE_DELAY = 500;
 
-export function TracksEditor({
-  initialTracks,
-  chrome,
-  season,
-  year,
-}: {
-  initialTracks: Track[];
-  /** The landing document — the header and footer the preview draws. */
-  chrome: Chrome;
-  /** The season, so the preview can show which weekends visit a circuit. */
-  season: readonly EventSummary[];
-  year: number;
-}) {
+export function TracksEditor({ initialTracks }: { initialTracks: Track[] }) {
   // The sport this screen belongs to. Every write below names it, so the
   // server guards the right one — see SiteScope.
   const site = useSite();
@@ -316,28 +301,15 @@ export function TracksEditor({
         onToggleFields={() => setFieldsOpen((open) => !open)}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-2 lg:flex-row">
-        {/*
-          Hidden below lg: at that width the fields already fill the screen, and
-          a preview shrunk into what is left would be unreadable rather than
-          useful.
-        */}
-        <CircuitPreview
-          tracks={tracks}
-          track={active}
-          chrome={chrome}
-          season={season}
-          year={year}
-          className="hidden lg:block lg:min-w-0 lg:flex-1"
-        />
+      <div className="flex min-h-0 flex-1 flex-col gap-2">
 
         <div
           className={cn(
-            "min-w-0 flex-1 overflow-hidden rounded-lg border border-border bg-card md:overflow-y-auto",
-            fieldsOpen ? "lg:w-[440px] lg:flex-none xl:w-[520px]" : "lg:hidden"
+            "min-h-0 flex-1 overflow-y-auto rounded-lg border border-border bg-card",
+            fieldsOpen ? "" : "hidden"
           )}
         >
-          <div className="space-y-2.5 bg-background/40 p-3">
+          <div className="mx-auto max-w-3xl space-y-2.5 bg-background/40 p-3">
             {active ? (
               confirmingDelete ? (
                 <div className="space-y-2.5 rounded-md border border-destructive/40 bg-destructive/10 p-3">

@@ -38,47 +38,21 @@ export type SiteStatus = (typeof SITE_STATUSES)[number];
  * without `circuits` has no circuits screen, no `/circuits` route and no
  * circuits section in the "+" picker; a sport with it has all three.
  */
-export const SITE_MODULES = ["decks", "forms", "articles", "events", "circuits"] as const;
+export const SITE_MODULES = ["articles", "events", "circuits"] as const;
 export type SiteModule = (typeof SITE_MODULES)[number];
 
 export const MODULE_LABELS: Record<SiteModule, string> = {
-  decks: "Decks",
-  forms: "Registrations",
   articles: "Articles",
   events: "Calendar",
   circuits: "Circuits",
 };
 
 export const MODULE_HINTS: Record<SiteModule, string> = {
-  decks: "Runs of images with their own address.",
-  forms: "Entry forms and the entries under them.",
   articles: "Written pieces with a cover and a rich-text body.",
   events: "Rounds and fixtures, each with its own page.",
   circuits: "Venues, with maps and lap records.",
 };
 
-/**
- * A surface within a site. `ctr.pages.kind`, from migration 0012.
- *
- *   home     the sections a visitor sees at the site's own address
- *   chrome   the header and the footer, which are sections like any other —
- *            that is what makes a per-sport header possible at all
- *   custom   a sub-page. Nothing creates one yet; the kind exists so that when
- *            something does, it is a row and not a migration.
- *
- * Here rather than in `sitesRepo` because the console's page editor is a client
- * component and has to name the page it is saving. Same argument the rest of
- * this file makes.
- */
-export const PAGE_KINDS = ["home", "chrome", "custom"] as const;
-export type PageKind = (typeof PAGE_KINDS)[number];
-
-/** What the console calls each. A `custom` page is named by its own row. */
-export const PAGE_KIND_LABELS: Record<PageKind, string> = {
-  home: "Page",
-  chrome: "Header and footer",
-  custom: "Page",
-};
 
 export type Site = {
   id: string;
@@ -143,48 +117,6 @@ export function slugUnder(site: SiteRef, href: string, route: string): string {
 /** A single path segment, and nothing after it — no second slash, no `#`, no `?`. */
 const SLUG_IN_PATH = /^[a-z0-9][a-z0-9-]*$/;
 
-/* ──────────────────────────────── Slugs ─────────────────────────────────── */
-
-/**
- * Slugs a sport may not have.
- *
- * A site slug becomes a top-level URL segment AND a top-level S3 folder, so it
- * can collide with a framework path, a route this project owns, an admin screen
- * or a reserved media segment. There is no recovering from a sport called
- * `api`, so the same list is a CHECK constraint in migration 0012 — the
- * database refuses it even if something reaches past this.
- *
- * `landing` is in the list and is also the root site's slug. That is not a
- * contradiction: the root is seeded by the migration, and no sport created
- * through the console may take the name.
- */
-export const RESERVED_SITE_SLUGS = [
-  "api", "console", "login", "logout", "images", "static", "public",
-  "media", "admins", "site", "sites", "uploads", "entries",
-  "deck", "decks", "register", "articles", "circuits", "calendar",
-  "events", "forms", "tracks", "robots", "sitemap", "favicon",
-  "con", "prn", "aux", "nul",
-];
-
-/** The shape the database will accept: a path segment and a folder name at once. */
-export const SITE_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,47}$/;
-
-/**
- * Why a slug is refused, or null if it is fine.
- *
- * Returns the sentence to show rather than a boolean, because every rejection
- * here has a different fix and "invalid" tells somebody nothing about which.
- */
-export function siteSlugProblem(slug: string, taken: string[] = []): string | null {
-  if (!slug) return "A sport needs an address.";
-  if (slug !== slug.toLowerCase()) return "Use lower case only.";
-  if (!SITE_SLUG_PATTERN.test(slug)) {
-    return "Letters, numbers and hyphens only, starting with a letter or number, up to 48 characters.";
-  }
-  if (RESERVED_SITE_SLUGS.includes(slug)) return `"${slug}" is reserved — it would collide with a page this site already serves.`;
-  if (taken.includes(slug)) return `"${slug}" is already taken by another sport.`;
-  return null;
-}
 
 /* ───────────────────────────── Normalising ──────────────────────────────── */
 

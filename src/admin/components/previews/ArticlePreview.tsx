@@ -3,13 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { Article } from "@/lib/articles";
 import { richTextIsEmpty } from "@/lib/richtext";
-import type { Chrome } from "@/lib/chrome";
 import { cn } from "@/lib/utils";
 import { PreviewMode } from "@/components/ui/PreviewMode";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { ArticleBody } from "@/app/(site)/_shell/articles/ArticleBody";
-import { ArticleHeader } from "@/app/(site)/_shell/articles/ArticleHeader";
+import { ArticleBody } from "@/components/site/articles/ArticleBody";
+import { ArticleHeader } from "@/components/site/articles/ArticleHeader";
 
 /**
  * The real article page, rendered from the draft, shrunk to fit beside the
@@ -32,14 +29,10 @@ const PREVIEW_WIDTH = 1440;
 
 export function ArticlePreview({
   article,
-  chrome,
-  year,
   className,
 }: {
   /** The draft being edited, or null when no article is open. */
   article: Article | null;
-  chrome: Chrome;
-  year: number;
   className?: string;
 }) {
   const paneRef = useRef<HTMLDivElement>(null);
@@ -75,13 +68,15 @@ export function ArticlePreview({
     >
       <div style={{ zoom: scale }} className="pointer-events-none origin-top-left">
         <PreviewMode>
-          <div className="bg-page p-3">
-            <div className="overflow-hidden rounded-card bg-surface">
-              <SiteHeader
-                content={chrome}
-                home={false}
-                className="relative z-20 border-b border-line bg-surface"
-              />
+          {/*
+            No header and no footer around the record. They used to be drawn
+            from the chrome document — the section-built header and footer of
+            the platform this console was ported from — and this site has
+            neither: its navigation and footer are components that read the
+            team's profile. What is worth previewing is the record itself.
+          */}
+          <div className="min-h-[60vh] bg-carbon-950 p-8 text-white">
+            <div className="mx-auto max-w-4xl">
 
               <section className="shell py-14">
                 {empty ? (
@@ -97,8 +92,6 @@ export function ArticlePreview({
                   </article>
                 )}
               </section>
-
-              <SiteFooter content={chrome} year={year} />
             </div>
           </div>
         </PreviewMode>

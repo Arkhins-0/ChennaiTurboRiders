@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { driverHref } from "@/lib/team";
 import type { Driver } from "@/types/site";
 
 /**
@@ -23,7 +24,7 @@ export function DriverPoster({
 }) {
   return (
     <Link
-      href={`/drivers/${driver.id}`}
+      href={driverHref(driver)}
       className={`group relative block overflow-hidden bg-carbon-900 ${className}`}
       aria-label={`${driver.firstName} ${driver.lastName}, #${driver.number}`}
     >
