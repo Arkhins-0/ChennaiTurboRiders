@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE } from "@/config/site";
 import { articleHref, articlesHref } from "@/lib/articles";
 import { listPublishedArticles } from "@/lib/server/articlesRepo";
-import { siteDrivers } from "@/lib/server/siteContent";
+import { siteDrivers, siteRosterYears } from "@/lib/server/siteContent";
 import { getRootSite } from "@/lib/server/sitesRepo";
 import { driverHref, DRIVERS_HREF, SPONSORS_HREF } from "@/lib/team";
 
@@ -22,9 +22,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const site = await getRootSite();
 
-  const [drivers, articles] = await Promise.all([
+  const [drivers, articles, years] = await Promise.all([
     siteDrivers(),
     listPublishedArticles(site.id),
+    siteRosterYears(),
   ]);
 
   const at = (path: string) => `${SITE.url}${path}`;
@@ -33,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: at("/"), lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: at("/about"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: at("/schedule"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: at("/history"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: at(SPONSORS_HREF), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
 
     { url: at(DRIVERS_HREF), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
@@ -42,6 +44,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // A record changes when a season does.
       changeFrequency: "monthly" as const,
       priority: 0.6,
+    })),
+    // A past year's lineup does not change once the season is over.
+    ...years.map((year) => ({
+      url: at(`/drivers/season/${year}`),
+      lastModified: now,
+      changeFrequency: "yearly" as const,
+      priority: 0.4,
     })),
 
     ...(articles.length > 0

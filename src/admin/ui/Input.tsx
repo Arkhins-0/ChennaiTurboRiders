@@ -1,21 +1,19 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 
 /**
  * Form controls.
  *
- * All three share one border, one radius and one focus treatment, so a row
- * mixing an input, a select and a button is flush. The fill is transparent
- * rather than a colour: on a card the field then reads as an outline on the
- * card's own surface, which is what keeps the UI flat.
+ * All three share one border, one radius and one focus treatment — the border
+ * turns the accent and a soft accent ring appears — so a row mixing an input,
+ * a select and a button is flush. Filled with the card colour and a whisper of
+ * shadow, as a workspace's fields are.
  */
 
 const FIELD =
-  "w-full min-w-0 rounded-md border border-input bg-transparent px-2.5 text-sm text-foreground outline-none transition " +
-  "placeholder:text-muted-fg/60 " +
-  "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 " +
-  "disabled:pointer-events-none disabled:opacity-50";
+  "w-full min-w-0 rounded-lg border border-input bg-card px-3 text-sm text-foreground shadow-sm outline-none transition-shadow " +
+  "placeholder:text-faint " +
+  "focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/20 " +
+  "disabled:pointer-events-none disabled:opacity-60";
 
 export function Input({ className, ...props }: React.ComponentProps<"input">) {
   return <input className={cn(FIELD, "h-9 py-1", className)} {...props} />;
@@ -30,5 +28,5 @@ export function Select({ className, ...props }: React.ComponentProps<"select">) 
 }
 
 export function Label({ className, ...props }: React.ComponentProps<"span">) {
-  return <span className={cn("block text-[13px] font-medium text-foreground", className)} {...props} />;
+  return <span className={cn("block text-[13px] font-medium text-muted-fg", className)} {...props} />;
 }

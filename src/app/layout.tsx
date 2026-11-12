@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans, Inter, JetBrains_Mono, Rajdhani } from "next/font/google";
+import { Inter, JetBrains_Mono, Rajdhani } from "next/font/google";
 import { MEDIA_BASE_URL } from "@/config/media";
 import { SEO, SITE } from "@/config/site";
 import "@/styles/globals.css";
@@ -34,16 +34,9 @@ const mono = JetBrains_Mono({
 });
 
 /*
- * The admin's face, and only the admin's. A humanist sans with a tall x-height
- * that stays legible at the 13-14px the tool is built at, and visibly not the
- * site's own type — the editor should never be mistaken for the page it edits.
+ * The console has no face of its own: `font-ui` is Inter, read through
+ * `--font-body` above (tailwind.config.ts), so the tool costs no extra font.
  */
-const plex = IBM_Plex_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600"],
-  variable: "--font-ui",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -85,7 +78,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${rajdhani.variable} ${mono.variable} ${plex.variable}`}>
+    <html lang="en" className={`dark ${inter.variable} ${rajdhani.variable} ${mono.variable}`}>
       <body className="antialiased">
         {/*
           The first banner photo is the LCP element and lives on another host.

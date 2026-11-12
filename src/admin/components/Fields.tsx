@@ -139,7 +139,7 @@ export function ButtonFields({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-md border border-border bg-background/60 p-3", className)}>
+    <div className={cn("rounded-lg border border-border bg-high/60 p-3", className)}>
       <div className="mb-2 flex items-baseline gap-2">
         <span className="shrink-0 text-[11px] font-medium text-muted-fg">{title}</span>
         {hint ? <span className="truncate text-[11px] text-muted-fg/70">{hint}</span> : null}
@@ -167,7 +167,7 @@ export function ErrorNote({ children }: { children: React.ReactNode }) {
   return (
     <p
       role="alert"
-      className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+      className="rounded-lg border border-destructive/30 bg-destructive/[0.06] px-3 py-2 text-xs text-destructive"
     >
       {children}
     </p>

@@ -106,7 +106,12 @@ export default async function AboutPage() {
 
       {/* Journey */}
       <section className="section-container py-16 md:py-24">
-        <SectionHeading index="02" label={`Since ${site.founded}`} title="Our Journey" />
+        <SectionHeading
+          index="02"
+          label={`Since ${site.founded}`}
+          title="Our Journey"
+          action={{ href: "/history", label: "Season by season" }}
+        />
         <ol className="mt-14 grid gap-px border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4">
           {[...achievements].reverse().map((a, i) => (
             <Reveal

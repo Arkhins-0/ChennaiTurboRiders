@@ -1,5 +1,8 @@
 import type { Config } from "tailwindcss";
 
+/** A console colour: a CSS variable holding "r g b", so `/opacity` still works. */
+const v = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 /**
  * Dark, card-led palette.
  *
@@ -13,11 +16,9 @@ import type { Config } from "tailwindcss";
  * and the call-to-action band. `accent-ink` is the only thing that may sit ON
  * accent — near-black, because yellow needs dark type over it.
  *
- * The second block of colours is the ADMIN's, and it is a different design
- * altogether: a monochrome tool palette in the manner of Reactive Resume, where
- * depth is one step of grey at a time and the absence of colour is the point.
- * Two exceptions, both meaningful: `primary` is CTR's yellow so the one action
- * that writes to the database is unmistakable, and `destructive` is red.
+ * The second block of colours is the CONSOLE's, and it is a different design
+ * altogether: a light workspace — white pages, a grey sidebar, one violet
+ * accent — that follows the OS into dark mode. See the block itself.
  *
  * The two sets never mix. Site components use page/surface/panel/accent; admin
  * components use background/card/muted/primary. Anything using both would look
@@ -26,6 +27,15 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
+    /*
+     * Every colour as a shadow colour, except `card`: `shadow-card` is the
+     * console's card shadow (boxShadow below), and with `card` also a shadow
+     * colour the same class would emit both and tint the shadow white.
+     */
+    boxShadowColor: ({ theme }) => {
+      const { card: _card, ...colors } = theme("colors") as Record<string, unknown>;
+      return colors as Record<string, string>;
+    },
     extend: {
       colors: {
         accent: {
@@ -49,21 +59,33 @@ const config: Config = {
         },
 
         /* ─────────────────────────── Admin only ───────────────────────────
-           Warm achromatic greys, one step apart. Elevation is a lighter grey,
-           never a shadow; separation is a 10%-white hairline, which sits on any
-           of these surfaces without banding the way a solid grey would. */
-        background: "#212121",
-        foreground: "#FBFBFB",
-        card: { DEFAULT: "#2C2C2C", fg: "#FBFBFB" },
-        // Hover states, inactive tabs, and anything deliberately receding.
-        muted: { DEFAULT: "#3C3C3C", fg: "#ADADAD" },
-        // The one bright colour in the admin: the action that writes.
-        primary: { DEFAULT: "#F7D619", fg: "#1A1A1A" },
-        secondary: { DEFAULT: "#3C3C3C", fg: "#FBFBFB" },
-        destructive: "#F0605F",
-        border: "rgb(255 255 255 / 0.10)",
-        input: "rgb(255 255 255 / 0.16)",
-        ring: "#8E8E8E",
+           The console's look is a workspace's: white pages, a quiet grey
+           sidebar (`rail`), hairline borders, near-black type in three weights
+           of grey (foreground, muted-fg, faint) and one violet accent
+           (`primary`). Each name is a CSS variable set in
+           src/styles/globals.css — a light set, and a dark set under
+           `prefers-color-scheme: dark` — written as "r g b" so the opacity
+           modifiers (`bg-primary/10`, `ring-ring/40`) keep working. The NAMES
+           are the ones every console screen already used, so the screens take
+           the palette without being rewritten. */
+        background: v("c-bg"),
+        foreground: v("c-fg"),
+        card: { DEFAULT: v("c-card"), fg: v("c-fg") },
+        // Hover states, selected rows, anything deliberately receding.
+        muted: { DEFAULT: v("c-high"), fg: v("c-soft") },
+        // The accent: the action that writes, the open page, focus.
+        primary: { DEFAULT: v("c-primary"), deep: v("c-primary-deep"), fg: v("c-on-primary") },
+        secondary: { DEFAULT: v("c-high"), fg: v("c-fg") },
+        destructive: v("c-danger"),
+        border: v("c-line"),
+        input: v("c-input"),
+        ring: v("c-primary"),
+        // The sidebar's grey, a raised surface, and the quietest text.
+        rail: v("c-rail"),
+        high: v("c-high"),
+        faint: v("c-faint"),
+        ok: { bg: "rgb(34 197 94 / 0.14)", fg: v("c-ok") },
+        warn: { bg: "rgb(234 179 8 / 0.14)", line: "rgb(234 179 8 / 0.45)", fg: v("c-warn") },
         /* ──────────────────────── Chennai Turbo Riders ────────────────────
            The F4 site's own palette: racing yellow on carbon black. It
            overlaps `accent` by value and not by name on purpose — the site
@@ -98,9 +120,15 @@ const config: Config = {
         // The site's data face: readouts, labels, timestamps — the broadcast
         // graphics of a race weekend.
         mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
-        // The admin's only face. A different family from the site's on purpose:
-        // the tool should never read as part of the thing it edits.
-        ui: ["var(--font-ui)", "system-ui", "sans-serif"],
+        // The console's face: Inter, the same `--font-body` the site loads, set
+        // at the tool's own sizes (13-14px) with Inter's alternate glyphs on.
+        ui: ["var(--font-body)", "system-ui", "sans-serif"],
+      },
+      // The console's: a whisper of a shadow on cards, a real one on anything
+      // that floats (the jump palette, dialogs, toasts, the phone's drawer).
+      boxShadow: {
+        card: "0 1px 2px rgb(16 24 40 / 0.04)",
+        pop: "0 12px 32px -8px rgb(16 24 40 / 0.18), 0 2px 6px rgb(16 24 40 / 0.06)",
       },
       borderRadius: {
         card: "28px",

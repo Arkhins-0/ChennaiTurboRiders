@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * database connection. What the hostname decides is which of the two
  * applications in this repo is reachable:
  *
- *   the admin host     the admin, at its own root: /, /landing, /incrc, /login
+ *   the admin host     the admin, at its own root: /, /media, /login
  *   every other host   the public site, and nothing else
  *
  * Which hostnames are which is configuration, not code — see ADMIN_HOSTS below.
@@ -139,7 +139,7 @@ function adminHost(request: NextRequest, pathname: string) {
   // route. Files (/images/..., favicons) are likewise served as they are.
   if (pathname.startsWith("/api/") || isFile(pathname)) return NextResponse.next();
 
-  // /landing → /console/landing, / → /console. The address bar keeps showing the
+  // /media → /console/media, / → /console. The address bar keeps showing the
   // clean path: a rewrite is internal and is not re-run through this middleware,
   // so the mount point stays unreachable from outside.
   const url = request.nextUrl.clone();

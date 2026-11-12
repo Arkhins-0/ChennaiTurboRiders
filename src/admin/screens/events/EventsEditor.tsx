@@ -47,10 +47,18 @@ import { EventForm } from "./EventForm";
 const ORDER_SAVE_DELAY = 500;
 
 export function EventsEditor({
+  season,
   initialEvents,
   tracks,
   siteUrl,
 }: {
+  /**
+   * The season these rounds belong to. The screen shows one season at a time —
+   * with every year the team has raced on file, one flat list of all of them
+   * was a list nobody could find a round in — and a round added here is added
+   * to it rather than to whichever season happens to be newest.
+   */
+  season: { id: string; name: string };
   initialEvents: CtrEvent[];
   /** This sport's circuits, for the picker and the preview's photograph. */
   tracks: Track[];
@@ -244,6 +252,7 @@ export function EventsEditor({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...BLANK_EVENT,
+          season_id: season.id,
           title,
           slug,
           sort_order: events.reduce((top, event) => Math.max(top, event.sort_order), 0) + 10,
@@ -367,7 +376,7 @@ export function EventsEditor({
       <div className="flex min-h-0 flex-col gap-2 md:h-full">
         <AdminRailSlot>
           <SectionRail
-            heading="Season"
+            heading={season.name || "Rounds"}
             items={railItems}
             active={activeId ?? ""}
             onSelect={setActiveId}
@@ -377,13 +386,13 @@ export function EventsEditor({
 
         <EditorToolbar
           Icon={CalendarIcon}
-          title={active ? nameOf(active) : "Season"}
+          title={active ? nameOf(active) : season.name || "Rounds"}
           hint={
             adding
               ? "Give the new event a name and an address."
               : active
                 ? "Drag the sidebar to set the order the season runs in."
-                : "No events yet — add the first one."
+                : "No rounds in this season yet — add the first one."
           }
           dirty={dirty}
           justSaved={justSaved}
@@ -405,7 +414,7 @@ export function EventsEditor({
               disabled={busy || adding}
             >
               <PlusIcon />
-              Add event
+              Add round
             </Button>
           }
           fieldsOpen={fieldsOpen}

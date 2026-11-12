@@ -8,6 +8,7 @@ header — see [The two front doors](#the-two-front-doors).
 npm install
 npm run db:migrate                              # the schema
 npm run db:seed                                 # starting content
+npm run db:import-history                       # the team's past seasons
 npm run create-admin -- <username> <password>   # an owner, or nothing opens
 npm run dev                                     # site :3000, console :4000
 ```
@@ -65,7 +66,7 @@ src/
   components/site/   this site's own components
   styles/globals.css
 migrations/          NNNN_name.sql, applied in order, checksummed
-scripts/             migrate, seed, create-admin, storage:copy (move media between buckets)
+scripts/             migrate, seed, import-history, create-admin, storage:copy (move media between buckets)
 ```
 
 `lib/` and `lib/server/` are split by what may reach the browser: anything under
@@ -98,10 +99,10 @@ the database. There is no static content file.
 | Team & site | the masthead, the footer, the hero and about bands on `/`, `/about`, the car panel, the timeline |
 | Drivers | `/drivers`, `/drivers/[slug]`, and the reel on the home page |
 | Sponsors | `/sponsors` and the logo marquee on the home page |
-| Season · rounds | `/schedule` — the calendar, the next-race panel and its countdown |
+| Seasons | `/schedule` (the season being raced: calendar, next-race panel, countdown), `/history` (every season: league, lineup, team result, titles), `/drivers/season/<year>` (that year's roster, linked from the year tabs on `/drivers`), and the "With CTR" record on each driver page |
 | Circuits | the venue on each round of `/schedule` |
 | Articles | `/news`, `/news/[slug]`, and the home page's latest-news band |
-| Media, Accounts, Co-admins | console-side |
+| Media, Accounts, Co-admins, QR codes, Exports | console-side |
 
 The console arrived as a port of CTR Unified's, and for a while it carried
 that platform's screens too — a section-built landing page and its header and
@@ -109,6 +110,22 @@ footer, sports cards, decks, registration forms, enquiries — editing content
 this site never rendered. `0025_ctr_shape.sql` removed all of it, along with
 the unrouted page components under `_shell/` that would have drawn it. The
 console is now the shape of the site.
+
+### Seasons: the calendar and the history are one table
+
+The team does not run a championship; it enters other people's (the Indian
+Racing League, the Indian F4 Championship). `0026_team_seasons.sql` gives each
+`ctr.seasons` row the team's side of it — the league (`ctr.championships`), the
+year, the car, where the team finished, a driver title — and adds the lineup in
+`ctr.season_drivers`, linked to a driver profile where there is one.
+
+A season to come and a season gone are the same row. Add next year's season and
+its rounds in the console's **Seasons** screen; `/schedule` shows it while it is
+being raced, and `/history` files it under its year once it has a result or its
+last round is over. Nothing is entered twice.
+
+`scripts/seed-data/history.json` is the 2022–2025 record, transcribed from the
+team's spreadsheet, and `npm run db:import-history` writes it.
 
 ### Two columns this deployment added
 
@@ -133,6 +150,7 @@ npm run dev:app        # just the Next server on :3000
 npm run db:migrate     # apply pending migrations
 npm run db:status      # what is applied, what is pending
 npm run db:seed        # starting rows; each kind only fires on its own empty table
+npm run db:import-history  # past seasons from scripts/seed-data/history.json; safe to re-run (--dry-run to preview)
 npm run create-admin -- <username> <password>
 
 npx tsc --noEmit

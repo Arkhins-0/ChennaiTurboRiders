@@ -120,6 +120,10 @@ export function RichText({
    * ref so they always run the current one.
    */
   const onChangeRef = useRef(onChange);
+
+  /* What the parent holds now, for the empty-document check in `onUpdate`. */
+  const valueRef = useRef(value);
+  valueRef.current = value;
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
@@ -191,6 +195,13 @@ export function RichText({
       },
     },
     onUpdate: ({ editor: current }) => {
+      /*
+       * An empty document comes back from ProseMirror as one empty paragraph,
+       * and the editor reports that as an update when it loads. Passing it up
+       * marked every record with no text as "Unsaved" the moment it was
+       * opened. Empty in, empty out, is not an edit.
+       */
+      if (current.isEmpty && isEmptyDoc(valueRef.current)) return;
       onChangeRef.current(current.getJSON() as RichDoc);
     },
   });
@@ -640,4 +651,11 @@ function LinkDialog({
       </div>
     </Dialog>
   );
+}
+
+/** No content, or nothing but empty paragraphs. */
+function isEmptyDoc(doc: unknown): boolean {
+  const content = (doc as { content?: { type?: string; content?: unknown[] }[] } | null)?.content;
+  if (!Array.isArray(content)) return true;
+  return content.every((node) => node?.type === "paragraph" && !(node.content?.length));
 }

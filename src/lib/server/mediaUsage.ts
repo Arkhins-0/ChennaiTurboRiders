@@ -86,8 +86,8 @@ export type KeyUsage = { key: string; refs: UsageRef[] };
  * Those tables are gone. Every photograph on both pages is a row now, seeded
  * from scripts/seed-data/*.json, so the database scan below already sees all of
  * them: a picture in use is a picture some row points at, with no second list to
- * keep in step. What remains in that file is one /public placeholder, which is
- * not an upload and cannot be deleted from the media library.
+ * keep in step. That file is gone too: its last entry was a /public placeholder
+ * that no page used, and a /public file is not an upload anyway.
  *
  * Kept as a function rather than deleted outright because the caller's shape is
  * "everything the database knows, plus everything the code does" — and the day
@@ -240,7 +240,7 @@ export async function findUsage(keys: string[]): Promise<KeyUsage[]> {
   const pinned = sourcePinnedKeys();
   for (const key of wanted) {
     if (pinned.has(key)) {
-      add(key, { kind: "source", label: "Built into the code (src/config/images.ts)", site: null });
+      add(key, { kind: "source", label: "Built into the code", site: null });
     }
   }
 

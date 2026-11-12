@@ -7,7 +7,9 @@ import { listEventsOfSeason } from "@/lib/server/eventsRepo";
 import {
   deleteSeason,
   getSeason,
+  listLineup,
   moveEventsToSeason,
+  replaceLineup,
   updateSeason,
 } from "@/lib/server/seasonsRepo";
 import { revalidateSeasonPages } from "@/lib/server/revalidateSeasons";
@@ -97,8 +99,16 @@ export async function PUT(request: Request, { params }: Params) {
     // which names the old folder, and the move has since rewritten that row.
     const fresh = moved ? ((await getSeason(id)) ?? season) : season;
 
+    /*
+     * The lineup rides along with the season when the editor sends one. Absent
+     * means "not edited here", not "nobody drove" — a caller that predates the
+     * lineup must not wipe it.
+     */
+    const sent = (body as { lineup?: unknown })?.lineup;
+    const lineup = Array.isArray(sent) ? await replaceLineup(id, sent) : await listLineup(id);
+
     revalidateSeasonPages(guard.site);
-    return NextResponse.json({ season: fresh, notes });
+    return NextResponse.json({ season: fresh, lineup, notes });
   } catch (error) {
     if ((error as { code?: string })?.code === DUPLICATE) {
       return NextResponse.json(

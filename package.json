@@ -13,6 +13,7 @@
     "db:status": "node --env-file=.env --env-file-if-exists=.env.local scripts/migrate.mjs --status",
     "db:reconcile": "node --env-file=.env --env-file-if-exists=.env.local scripts/reconcile-checksums.mjs",
     "db:seed": "node --env-file=.env --env-file-if-exists=.env.local scripts/seed.mjs",
+    "db:import-history": "node --env-file=.env --env-file-if-exists=.env.local scripts/import-history.mjs",
     "db:types": "node --env-file=.env --env-file-if-exists=.env.local scripts/gen-types.mjs",
     "storage:copy": "node --env-file=.env --env-file-if-exists=.env.local scripts/copy-storage.mjs",
     "create-admin": "node --env-file=.env --env-file-if-exists=.env.local scripts/create-admin.mjs",
@@ -22,9 +23,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.716.0",
     "@aws-sdk/s3-request-presigner": "^3.1111.0",
-    "@capacitor/android": "^8.5.2",
-    "@capacitor/cli": "^8.5.2",
-    "@capacitor/core": "^8.5.2",
     "@neondatabase/serverless": "^1.1.0",
     "@tiptap/extension-image": "^2.27.2",
     "@tiptap/extension-link": "^2.27.2",
@@ -37,6 +35,7 @@
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.469.0",
     "next": "^15.1.6",
+    "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "server-only": "^0.0.1",
@@ -44,6 +43,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "autoprefixer": "^10.4.20",

@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { Compass, CornerUpRight, MapPin, Ruler } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Compass, CornerUpRight, MapPin, Ruler } from "lucide-react";
 import { CountdownTimer } from "@/components/site/CountdownTimer";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
 import { eventDateLabel, eventDateParts, eventIsPast, eventStart, nextEventIndex } from "@/lib/raceDates";
-import { currentPublishedSeason } from "@/lib/server/seasonsRepo";
+import { currentPublishedSeasons } from "@/lib/server/seasonsRepo";
 import { getRootSite } from "@/lib/server/sitesRepo";
 import { getTrack } from "@/lib/server/tracksRepo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getRootSite();
-  const current = await currentPublishedSeason(site.id);
+  const current = await currentPublishedSeasons(site.id);
+  const names = current.map((c) => c.season.name).join(" and ");
 
   return {
     title: "Race Calendar",
-    description: current
-      ? `The complete ${current.season.name} race calendar for Chennai Turbo Riders.`
+    description: names
+      ? `The complete ${names} race calendar for Chennai Turbo Riders.`
       : "The race calendar for Chennai Turbo Riders.",
   };
 }
@@ -24,10 +26,16 @@ export default async function SchedulePage() {
   const site = await getRootSite();
   const now = new Date();
 
-  // One season's rounds, already filtered to "the season that is now".
-  const current = await currentPublishedSeason(site.id, now);
-  const season = current?.season ?? null;
-  const events = current?.events ?? [];
+  /*
+   * Every season being raced now — usually one, two when the IRL and F4 run in
+   * the same year. Each gets its own list below; the next-race panel is the
+   * soonest round across all of them.
+   */
+  const current = await currentPublishedSeasons(site.id, now);
+  const season = current.length === 1 ? current[0].season : null;
+  const events = current
+    .flatMap((c) => c.events)
+    .sort((a, b) => (eventStart(a)?.getTime() ?? Infinity) - (eventStart(b)?.getTime() ?? Infinity));
 
   // A running weekend counts as next; after the finale, the last round stays.
   const upcoming = events.length > 0 ? events[nextEventIndex(events, now)] : null;
@@ -40,7 +48,11 @@ export default async function SchedulePage() {
         crumb="Calendar"
         title="Race Calendar"
         description={season?.subtitle || "Every round of the season, as it stands."}
-        aside={season ? `${season.name} · ${events.length} rounds` : "Calendar"}
+        aside={
+          current.length > 0
+            ? `${current.map((c) => c.season.name).join(" + ")} · ${events.length} rounds`
+            : "Calendar"
+        }
       />
 
       <div className="section-container py-16 md:py-24">
@@ -88,9 +100,14 @@ export default async function SchedulePage() {
               </Reveal>
             ) : null}
 
-            {/* Rounds */}
-            <ol className="mt-14 border-t border-white/10">
-              {events.map((event, i) => {
+            {/* Rounds, one list per season */}
+            {current.map(({ season: listed, events: rounds }) => (
+            <div key={listed.id} className="mt-14">
+            {current.length > 1 ? (
+              <h2 className="readout mb-4 text-racing-yellow">{listed.name}</h2>
+            ) : null}
+            <ol className="border-t border-white/10">
+              {rounds.map((event, i) => {
                 const isNext = event.id === upcoming?.id;
                 const past = eventIsPast(event, now);
                 const parts = eventDateParts(event);
@@ -100,7 +117,9 @@ export default async function SchedulePage() {
                     as="li"
                     delay={i * 0.04}
                     className={`grid grid-cols-[3.5rem_1fr_auto] items-center gap-4 border-b border-white/10 py-6 md:grid-cols-[6rem_1fr_auto_10rem] md:gap-8 ${
-                      past ? "opacity-40" : ""
+                      // On the children, not the row: Reveal animates the row's
+                      // own opacity to 1, which would undo it.
+                      past ? "[&>*]:opacity-40" : ""
                     } ${isNext ? "bg-racing-yellow/[0.04]" : ""}`}
                   >
                     <span
@@ -119,7 +138,12 @@ export default async function SchedulePage() {
                     </div>
 
                     <div className="hidden md:block">
-                      {event.badge ? (
+                      {/* A run round is complete whatever its badge said
+                          beforehand — "Entries open" on a finished weekend
+                          is the badge nobody remembered to change. */}
+                      {past ? (
+                        <span className="readout text-[10px]">Complete</span>
+                      ) : event.badge ? (
                         <span className="readout border border-white/15 px-2 py-1 text-[10px] text-carbon-200">
                           {event.badge}
                         </span>
@@ -127,8 +151,6 @@ export default async function SchedulePage() {
                         <span className="readout bg-racing-yellow px-2 py-1 text-[10px] font-semibold text-carbon-950">
                           Next
                         </span>
-                      ) : past ? (
-                        <span className="readout text-[10px]">Complete</span>
                       ) : null}
                     </div>
 
@@ -150,6 +172,14 @@ export default async function SchedulePage() {
                 );
               })}
             </ol>
+            </div>
+            ))}
+
+            <p className="mt-6 flex justify-end">
+              <Link href="/history" className="readout inline-flex items-center gap-2 text-[10px] transition-colors hover:text-racing-yellow">
+                Past seasons <ArrowRight className="size-3.5" />
+              </Link>
+            </p>
 
             {/* The circuit the next round runs at */}
             {track ? (

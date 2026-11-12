@@ -9,11 +9,10 @@ import { DragIcon, EyeIcon, EyeSlashIcon, PlusIcon } from "@/admin/ui/icons";
  * Which part of a page is being edited — and, where the page has a running
  * order, what that order is.
  *
- * Lives at the top of the console sidebar, above the screen switcher — a plain
- * list of rows in the same shape as the links below it, so the whole left column
- * reads as one thing rather than two lists that happen to touch. Below `md:` the
- * same rows become a scrolling chip row, which is the sidebar's own behaviour at
- * that width.
+ * Lives in the console sidebar under the screens, as its "on this page" area —
+ * a plain list of rows in the same shape as the links above it, so the whole
+ * left column reads as one thing rather than two lists that happen to touch. On
+ * a phone the sidebar is a drawer, and picking a row closes it.
  *
  * An entry that carries `visible` is a section of the page itself: it can be
  * dragged up and down to move the section on the page, and switched off to take
@@ -107,12 +106,11 @@ export function SectionRail<Id extends string>({
   return (
     <nav
       aria-label={heading}
-      className="flex gap-1 overflow-x-auto md:flex-col md:overflow-x-visible"
+      className="flex flex-col gap-0.5"
     >
-      {/* pr-7 keeps the label clear of the sidebar's collapse button, which
-          floats at the top-right of this same line. */}
+      {/* Titled like the sidebar's own groups, which it sits under. */}
       {collapsed ? null : (
-        <p className="hidden px-2 py-1 pr-7 text-[11px] font-medium text-muted-fg md:block">
+        <p className="mb-0.5 px-2.5 text-[11px] font-medium uppercase tracking-wide text-faint">
           {heading}
         </p>
       )}
@@ -133,8 +131,8 @@ export function SectionRail<Id extends string>({
             onDragOver={(event) => event.preventDefault()}
             onDragEnd={() => setDragging(null)}
             className={cn(
-              "flex shrink-0 items-center gap-0.5 rounded-md pr-0.5 transition-colors",
-              selected ? "bg-muted" : "hover:bg-muted/60",
+              "flex shrink-0 items-center gap-0.5 rounded-lg pr-0.5 transition-colors",
+              selected ? "bg-primary/10" : "hover:bg-foreground/[0.05]",
               dragging === item.id && "opacity-40 ring-1 ring-primary/60"
             )}
           >
@@ -168,14 +166,15 @@ export function SectionRail<Id extends string>({
             <button
               type="button"
               onClick={() => onSelect(item.id)}
+              data-rail-select
               aria-current={selected ? "true" : undefined}
               title={collapsed ? `${item.title ?? item.short} — ${item.hint}` : item.hint}
               className={cn(
-                "flex min-w-0 flex-1 items-center gap-2 rounded-md py-1.5 pl-1.5 pr-1 text-left text-[13px] font-medium outline-none transition",
+                "flex h-8 min-w-0 flex-1 items-center gap-2.5 rounded-lg pl-2 pr-1 text-left text-[13px] font-medium outline-none transition",
                 "focus-visible:ring-[3px] focus-visible:ring-ring/40",
                 collapsed && "md:justify-center md:px-0",
                 selected
-                  ? "text-foreground"
+                  ? "text-primary"
                   : off
                     ? "text-muted-fg/50 hover:text-foreground"
                     : "text-muted-fg hover:text-foreground"
@@ -222,9 +221,9 @@ export function SectionRail<Id extends string>({
             onClick={() => setPicking((open) => !open)}
             aria-expanded={picking}
             className={cn(
-              "flex w-full items-center gap-2 rounded-md py-1.5 pl-1.5 pr-1 text-left text-[13px] font-medium outline-none transition",
+              "flex h-8 w-full items-center gap-2.5 rounded-lg pl-2 pr-1 text-left text-[13px] font-medium outline-none transition",
               "focus-visible:ring-[3px] focus-visible:ring-ring/40",
-              picking ? "bg-muted text-foreground" : "text-muted-fg hover:bg-muted/60 hover:text-foreground"
+              picking ? "bg-high text-foreground" : "text-muted-fg hover:bg-foreground/[0.05] hover:text-foreground"
             )}
           >
             {/* The spacer keeps this line's icon under the rows' icons, which

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { guardRequestSite } from "@/lib/server/access";
-import { createSeason, listSeasons } from "@/lib/server/seasonsRepo";
+import { createSeason, listSeasons, replaceLineup } from "@/lib/server/seasonsRepo";
 import { revalidateSeasonPages } from "@/lib/server/revalidateSeasons";
 
 export const runtime = "nodejs";
@@ -59,8 +59,10 @@ export async function POST(request: Request) {
   try {
     const notes: string[] = [];
     const season = await createSeason(guard.site.id, body, notes);
+    const sent = (body as { lineup?: unknown })?.lineup;
+    const lineup = Array.isArray(sent) ? await replaceLineup(season.id, sent) : [];
     revalidateSeasonPages(guard.site);
-    return NextResponse.json({ season, notes });
+    return NextResponse.json({ season, lineup, notes });
   } catch (error) {
     if ((error as { code?: string })?.code === DUPLICATE) {
       return NextResponse.json(

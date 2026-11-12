@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { FeaturedNews, NewsCard, newsCardFrom } from "@/components/site/NewsCard";
 import { PageHeader } from "@/components/site/PageHeader";
@@ -28,9 +29,18 @@ export default async function NewsPage() {
         {articles.length === 0 ? (
           /* An empty index says so: on a fresh install, and any time every
              piece is a draft, this is a state the page can reach. */
-          <p className="hud-corners p-16 text-center text-carbon-300">
-            Nothing published yet — check back shortly.
-          </p>
+          <div className="hud-corners flex flex-col items-center gap-6 p-16 text-center">
+            <p className="text-carbon-300">Nothing published yet — check back shortly.</p>
+            {/* Somewhere to go instead of a dead end. */}
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href="/schedule" className="btn-ghost">
+                <span>Race calendar</span>
+              </Link>
+              <Link href="/history" className="btn-ghost">
+                <span>Team history</span>
+              </Link>
+            </div>
+          </div>
         ) : (
           <>
             <Reveal>

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Quote } from "lucide-react";
 import { Counter } from "@/components/site/Counter";
 import { Reveal } from "@/components/site/Reveal";
-import { siteDriver, siteDrivers, siteTeam } from "@/lib/server/siteContent";
+import { siteDriver, siteDriverSeasons, siteDrivers, siteTeam } from "@/lib/server/siteContent";
 import { driverHref, driverName } from "@/lib/team";
 import type { DriverStats } from "@/types/site";
 
@@ -58,6 +58,7 @@ export default async function DriverPage({ params }: { params: Promise<{ slug: s
   if (index === -1) notFound();
 
   const driver = drivers[index];
+  const seasons = await siteDriverSeasons(driver.id);
   const prev = drivers[(index - 1 + drivers.length) % drivers.length];
   const next = drivers[(index + 1) % drivers.length];
 
@@ -163,6 +164,41 @@ export default async function DriverPage({ params }: { params: Promise<{ slug: s
           </ol>
         </Reveal>
       </section>
+
+      {/* The seasons they raced for the team, from the lineups on /history */}
+      {seasons.length > 0 ? (
+        <section className="border-t border-white/10">
+          <Reveal className="section-container py-16 md:py-20">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="readout text-racing-yellow">With {site.abbreviation}</h2>
+              <Link href="/history" className="readout text-[10px] transition-colors hover:text-racing-yellow">
+                Team history →
+              </Link>
+            </div>
+            <ol className="mt-4 border-t border-white/10">
+              {seasons.map((s) => (
+                <li
+                  key={`${s.year}-${s.league}`}
+                  className="grid grid-cols-[4rem_1fr_auto] items-baseline gap-4 border-b border-white/10 py-4 sm:grid-cols-[5rem_1fr_9rem_6rem]"
+                >
+                  <span className="heading-font text-2xl font-bold leading-none text-white">{s.year}</span>
+                  <span className="text-sm text-carbon-100">{s.league || s.season}</span>
+                  <span className="hidden text-sm sm:block">
+                    {s.champion ? (
+                      <span className="font-semibold text-racing-yellow">Champion</span>
+                    ) : s.result ? (
+                      <span className="text-carbon-300">Team {s.result.toLowerCase()}</span>
+                    ) : null}
+                  </span>
+                  <span className="text-right font-mono text-xs tabular-nums text-carbon-200">
+                    {s.points != null ? `${s.points} pts` : ""}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </Reveal>
+        </section>
+      ) : null}
 
       {/* Previous / next */}
       <nav aria-label="Other drivers" className="border-t border-white/10">

@@ -3,7 +3,7 @@ import { CountdownTimer } from "@/components/site/CountdownTimer";
 import { Reveal } from "@/components/site/Reveal";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { eventDateLabel, eventDateParts, eventIsPast, eventStart, nextEventIndex } from "@/lib/raceDates";
-import { currentPublishedSeason } from "@/lib/server/seasonsRepo";
+import { currentPublishedSeasons } from "@/lib/server/seasonsRepo";
 import { getRootSite } from "@/lib/server/sitesRepo";
 import { getTrack } from "@/lib/server/tracksRepo";
 
@@ -17,10 +17,13 @@ import { getTrack } from "@/lib/server/tracksRepo";
 export async function ScheduleSection() {
   const site = await getRootSite();
   const now = new Date();
-  const current = await currentPublishedSeason(site.id, now);
-  const events = current?.events ?? [];
+  // Every season being raced now: two when the IRL and F4 overlap.
+  const current = await currentPublishedSeasons(site.id, now);
+  const events = current
+    .flatMap((c) => c.events)
+    .sort((a, b) => (eventStart(a)?.getTime() ?? Infinity) - (eventStart(b)?.getTime() ?? Infinity));
 
-  if (!current || events.length === 0) return null;
+  if (events.length === 0) return null;
 
   const upcoming = events[nextEventIndex(events, now)];
   const track = upcoming?.track_id ? await getTrack(upcoming.track_id) : null;
@@ -32,7 +35,7 @@ export async function ScheduleSection() {
       <div className="section-container relative">
         <SectionHeading
           index="04"
-          label={current.season.name}
+          label={current.map((c) => c.season.name).join(" + ")}
           title="Race Calendar"
           action={{ href: "/schedule", label: "Full calendar" }}
         />
@@ -75,9 +78,12 @@ export async function ScheduleSection() {
             </Reveal>
           ) : null}
 
-          <Reveal delay={0.1}>
+          <Reveal delay={0.1} className="space-y-8">
+            {current.map(({ season, events: rounds }) => (
+            <div key={season.id}>
+            {current.length > 1 ? <p className="readout mb-3 text-racing-yellow">{season.name}</p> : null}
             <ol className="border-t border-white/10">
-              {events.map((event, i) => {
+              {rounds.map((event, i) => {
                 const isNext = event.id === upcoming?.id;
                 const past = eventIsPast(event, now);
                 const parts = eventDateParts(event);
@@ -121,6 +127,8 @@ export async function ScheduleSection() {
                 );
               })}
             </ol>
+            </div>
+            ))}
           </Reveal>
         </div>
       </div>

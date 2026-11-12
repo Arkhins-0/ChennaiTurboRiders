@@ -5,7 +5,7 @@ import { listSites } from "@/lib/server/sitesRepo";
 import { AdminShell } from "@/admin/components/AdminShell";
 
 export const metadata: Metadata = {
-  title: "CTR Admin",
+  title: "CTR Console",
   robots: { index: false, follow: false },
 };
 

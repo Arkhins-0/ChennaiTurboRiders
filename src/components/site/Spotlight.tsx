@@ -40,11 +40,18 @@ export function Spotlight() {
 
   if (!enabled) return null;
 
+  /*
+   * Centred by its position, NOT by `-translate-x-1/2 -translate-y-1/2`.
+   * framer-motion writes `x`/`y` as an inline `transform`, which replaces
+   * Tailwind's translate outright — so the centring was silently dropped and the
+   * light's top-left corner followed the pointer, putting the glow below and to
+   * the right of it. Half of 36rem is 18rem.
+   */
   return (
     <motion.div
       aria-hidden
       style={{ x: sx, y: sy }}
-      className="pointer-events-none fixed left-0 top-0 z-[1] size-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(247,214,25,0.10),transparent_60%)] mix-blend-screen"
+      className="pointer-events-none fixed -left-[18rem] -top-[18rem] z-[1] size-[36rem] rounded-full bg-[radial-gradient(circle,rgba(247,214,25,0.10),transparent_60%)] mix-blend-screen"
     />
   );
 }

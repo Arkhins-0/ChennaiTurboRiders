@@ -5,6 +5,7 @@ import { getCar, getTeam, listAchievements } from "@/lib/server/teamRepo";
 import { listDrivers, getDriverBySlug } from "@/lib/server/driversRepo";
 import { listSponsorsByTier } from "@/lib/server/sponsorsRepo";
 import { getRootSite } from "@/lib/server/sitesRepo";
+import { listDriverSeasons, listTeamHistory, type DriverSeason, type HistorySeason } from "@/lib/server/historyRepo";
 import type { Achievement, CarSpecs, Driver, SponsorsData, TeamContent } from "@/types/site";
 
 /**
@@ -61,4 +62,20 @@ export const siteSponsors = cache(async (): Promise<SponsorsData> => {
 
 export const siteAchievements = cache(async (): Promise<Achievement[]> => {
   return listAchievements((await getRootSite()).id);
+});
+
+/** Every season the team has raced, newest first — /history, and the home page's record. */
+export const siteHistory = cache(async (): Promise<HistorySeason[]> => {
+  return listTeamHistory((await getRootSite()).id);
+});
+
+/** One driver's seasons with the team, for their profile. */
+export const siteDriverSeasons = cache(async (driverId: string): Promise<DriverSeason[]> => {
+  return listDriverSeasons(driverId);
+});
+
+/** Every year with a lineup on file, newest first — the roster's year tabs. */
+export const siteRosterYears = cache(async (): Promise<number[]> => {
+  const seasons = await siteHistory();
+  return [...new Set(seasons.filter((s) => s.drivers.length > 0).map((s) => s.year))].sort((a, b) => b - a);
 });

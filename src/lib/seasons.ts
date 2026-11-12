@@ -61,6 +61,23 @@ export type Season = {
   sort_order: number;
   /** Addresses it used to answer to. The public page redirects from these. */
   former_slugs: string[];
+
+  /* ── The team's side of it (0026). All optional: a season being planned has
+     none of these yet, and a season being raced has no result. ── */
+
+  /** Which league. "" when unfiled. */
+  championship_id: string;
+  /** The year it is filed under on /history. Null when not set. */
+  year: number | null;
+  car: string;
+  /** Where the team finished, as a number that sorts. */
+  team_position: number | null;
+  /** …and as the page says it: "4th", "Runner-up". */
+  team_result: string;
+  team_points: number | null;
+  /** A title one of our drivers won that season. */
+  champion: string;
+  notes: string;
 };
 
 export const BLANK_SEASON: Omit<Season, "id" | "site_id"> = {
@@ -71,7 +88,88 @@ export const BLANK_SEASON: Omit<Season, "id" | "site_id"> = {
   cover_image: "",
   sort_order: 0,
   former_slugs: [],
+  championship_id: "",
+  year: null,
+  car: "",
+  team_position: null,
+  team_result: "",
+  team_points: null,
+  champion: "",
+  notes: "",
 };
+
+/* ───────────────────────────── The league ───────────────────────────── */
+
+export type Championship = {
+  id: string;
+  slug: string;
+  name: string;
+  short_name: string;
+  website: string;
+  sort_order: number;
+};
+
+/* ────────────────────────────── The lineup ──────────────────────────── */
+
+/** One driver who raced for the team that season. */
+export type LineupEntry = {
+  /** Links the row to a profile on /drivers. "" for drivers without one. */
+  driver_id: string;
+  name: string;
+  nationality: string;
+  points: number | null;
+};
+
+export const LINEUP_MAX = 20;
+
+/** Whole points or halves — F4 awards half points for shortened races. */
+function points(value: unknown): number | null {
+  const n = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+  return typeof n === "number" && Number.isFinite(n) && n >= 0 && n < 100000 ? Math.round(n * 2) / 2 : null;
+}
+
+function whole(value: unknown, min: number, max: number): number | null {
+  const n = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+  return typeof n === "number" && Number.isInteger(n) && n >= min && n <= max ? n : null;
+}
+
+/** Rows with no name are dropped: an empty row in the editor is not a driver. */
+export function normaliseLineup(input: unknown): LineupEntry[] {
+  if (!Array.isArray(input)) return [];
+
+  return input
+    .filter(isRecord)
+    .map((row) => ({
+      driver_id: isSeasonId(row.driver_id) ? row.driver_id : "",
+      name: optionalText(row.name, 120),
+      nationality: optionalText(row.nationality, 60),
+      points: points(row.points),
+    }))
+    .filter((row) => row.name !== "")
+    .slice(0, LINEUP_MAX);
+}
+
+export function normaliseChampionshipInput(input: unknown): Omit<Championship, "id" | "sort_order"> {
+  const record = isRecord(input) ? input : {};
+  const name = optionalText(record.name, 120);
+
+  return {
+    name,
+    slug: usableSlug(slugify(optionalText(record.slug, SLUG_MAX))) || usableSlug(slugify(name)) || fallbackSlug("league"),
+    short_name: optionalText(record.short_name, 16),
+    website: optionalText(record.website, 300),
+  };
+}
+
+/** "4th", "Runner-up" — what a position reads as when nobody typed the words. */
+export function positionLabel(position: number | null): string {
+  if (!position) return "";
+  if (position === 1) return "Champions";
+  if (position === 2) return "Runner-up";
+  const tens = position % 100;
+  const suffix = tens >= 11 && tens <= 13 ? "th" : ["th", "st", "nd", "rd"][position % 10] ?? "th";
+  return `${position}${suffix}`;
+}
 
 /** A season reduced to what a LIST of them needs. */
 export type SeasonSummary = Omit<Season, "former_slugs">;
@@ -209,5 +307,13 @@ export function normaliseSeasonInput(
           .filter((entry) => isUsableSlug(entry) && entry !== slug)
           .slice(0, 20)
       : [],
+    championship_id: isSeasonId(record.championship_id) ? record.championship_id : "",
+    year: whole(record.year, 1950, 2200) ?? (year ? Number(year) : null),
+    car: optionalText(record.car, 200),
+    team_position: whole(record.team_position, 1, 200),
+    team_result: optionalText(record.team_result, 60),
+    team_points: points(record.team_points),
+    champion: optionalText(record.champion, 300),
+    notes: optionalText(record.notes, 2000),
   };
 }

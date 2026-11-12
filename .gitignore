@@ -12,3 +12,9 @@ next-env.d.ts
 # Throwaway build dir for NEXT_DIST_DIR verification builds
 .next-verify
 /docs
+
+# TypeScript incremental cache
+*.tsbuildinfo
+
+# Playwright MCP screenshots and logs
+.playwright-mcp/

@@ -402,3 +402,37 @@ export const RuleIcon = (p: IconProps) => (
     <path d="M5.6 5.6h8.8M5.6 14.4h8.8" opacity="0.4" />
   </Icon>
 );
+
+/* ── The shell, the dashboard and the tools ──
+   From lucide-react rather than drawn here: they are the workspace set the
+   console's look is taken from, and lucide is already a dependency. Each takes
+   `className` and `currentColor` like the ones above. */
+
+export {
+  CalendarDays as SeasonsIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  CircleCheck as CircleCheckIcon,
+  Clock as ClockIcon,
+  Download as DownloadIcon,
+  FileSpreadsheet as SpreadsheetIcon,
+  Flag as TeamIcon,
+  Handshake as SponsorsIcon,
+  History as HistoryIcon,
+  Image as MediaIcon,
+  LayoutDashboard as DashboardIcon,
+  LogOut as LogOutIcon,
+  MapPin as CircuitsIcon,
+  Menu as MenuIcon,
+  Newspaper as ArticlesIcon,
+  PenLine as WriteIcon,
+  QrCode as QrIcon,
+  Search as SearchLgIcon,
+  ShieldCheck as AccountsIcon,
+  Timer as TimerIcon,
+  TriangleAlert as AlertIcon,
+  UserCog as CoAdminsIcon,
+  Users as DriversIcon,
+  ExternalLink as ExternalLinkIcon,
+  CalendarPlus as CalendarPlusIcon,
+} from "lucide-react";

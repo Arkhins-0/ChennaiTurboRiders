@@ -1,0 +1,465 @@
+{
+  "source": "CTR copy.xlsx",
+  "team": "Chennai Turbo Riders",
+  "championships": [
+    {
+      "name": "Indian Racing League",
+      "slug": "indian-racing-league",
+      "seasons": [
+        {
+          "year": 2022,
+          "car": "Wolf GB08 Thunder, with a 215 bhp Aprilia engine",
+          "drivers": [
+            {
+              "name": "Jon Lancaster",
+              "nationality": "United Kingdom",
+              "points": 76
+            },
+            {
+              "name": "Parth Ghorpade",
+              "nationality": "India",
+              "points": 55
+            },
+            {
+              "name": "Vishnu Prasad",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Sandeep Kumar",
+              "nationality": "India",
+              "points": 36
+            },
+            {
+              "name": "Nicole Havrda",
+              "nationality": "Canada",
+              "points": 65
+            }
+          ],
+          "rounds": [
+            {
+              "round": 1,
+              "date_from": "2022-11-19",
+              "date_to": "2022-11-20",
+              "venue": "Hyderabad Street Circuit",
+              "track_slug": null
+            },
+            {
+              "round": 2,
+              "date_from": "2022-11-26",
+              "date_to": "2022-11-27",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 3,
+              "date_from": "2022-12-03",
+              "date_to": "2022-12-04",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 4,
+              "date_from": "2022-12-10",
+              "date_to": "2022-12-11",
+              "venue": "Hyderabad Street Circuit",
+              "track_slug": null
+            }
+          ],
+          "team_result": {
+            "position": 4,
+            "position_label": "4th",
+            "points": 227
+          }
+        },
+        {
+          "year": 2023,
+          "drivers": [
+            {
+              "name": "Nicole Havrda",
+              "nationality": "Canada",
+              "points": null
+            },
+            {
+              "name": "Mohamed Ryan",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Jon Lancaster",
+              "nationality": "United Kingdom",
+              "points": null
+            },
+            {
+              "name": "Sai Sanjay",
+              "nationality": "India",
+              "points": null
+            }
+          ],
+          "rounds": [
+            {
+              "round": 1,
+              "date_from": "2023-11-04",
+              "date_to": "2023-11-05",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 2,
+              "date_from": "2023-12-01",
+              "date_to": "2023-12-02",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 3,
+              "date_from": "2023-12-09",
+              "date_to": "2023-12-10",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            }
+          ],
+          "team_result": {
+            "position": 4,
+            "position_label": "4th",
+            "points": 90
+          }
+        },
+        {
+          "year": 2024,
+          "drivers": [
+            {
+              "name": "Jon Lancaster",
+              "nationality": "United Kingdom",
+              "points": null
+            },
+            {
+              "name": "Mohamed Ryan",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Sandeep Kumar",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Emily Duggan",
+              "nationality": "Australia",
+              "points": null
+            },
+            {
+              "name": "Mira Erda",
+              "nationality": "India",
+              "points": null
+            }
+          ],
+          "rounds": [
+            {
+              "round": 1,
+              "date_from": "2024-08-24",
+              "date_to": "2024-08-25",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 2,
+              "date_from": "2024-08-31",
+              "date_to": "2024-09-01",
+              "venue": "Chennai Street Circuit",
+              "track_slug": null
+            },
+            {
+              "round": 3,
+              "date_from": "2024-09-14",
+              "date_to": "2024-09-15",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 4,
+              "date_from": "2024-10-19",
+              "date_to": "2024-10-20",
+              "venue": "Kari Motor Speedway",
+              "track_slug": "kari-motor-speedway"
+            },
+            {
+              "round": 5,
+              "date_from": "2024-11-16",
+              "date_to": "2024-11-17",
+              "venue": "Kari Motor Speedway",
+              "track_slug": "kari-motor-speedway"
+            }
+          ],
+          "team_result": {
+            "position": 2,
+            "position_label": "Runner-up",
+            "points": 166
+          }
+        },
+        {
+          "year": 2025,
+          "drivers": [
+            {
+              "name": "Aqil Alibhai",
+              "nationality": "South Africa",
+              "points": null
+            },
+            {
+              "name": "Shibin Yousaf",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Tijil Rao",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Laura Camps Torras",
+              "nationality": "Spain",
+              "points": null
+            },
+            {
+              "name": "Viswas Vijayaraj",
+              "nationality": "India",
+              "points": null
+            }
+          ],
+          "rounds": [
+            {
+              "round": 1,
+              "date_from": "2025-08-16",
+              "date_to": "2025-08-17",
+              "venue": "Kari Motor Speedway",
+              "track_slug": "kari-motor-speedway"
+            },
+            {
+              "round": 2,
+              "date_from": "2025-08-23",
+              "date_to": "2025-08-24",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 3,
+              "date_from": "2025-10-04",
+              "date_to": "2025-10-05",
+              "venue": "Kari Motor Speedway",
+              "track_slug": "kari-motor-speedway"
+            },
+            {
+              "round": 4,
+              "date_from": "2026-02-21",
+              "date_to": "2026-02-22",
+              "venue": "Goa Street Circuit",
+              "track_slug": null
+            }
+          ],
+          "team_result": {
+            "position": null,
+            "position_label": null,
+            "points": 166
+          }
+        }
+      ]
+    },
+    {
+      "name": "Indian F4 Championship",
+      "slug": "indian-f4-championship",
+      "seasons": [
+        {
+          "year": 2023,
+          "drivers": [
+            {
+              "name": "Cooper Webster",
+              "nationality": "Australia",
+              "points": null
+            },
+            {
+              "name": "Rishab Jain",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Dion Gowda",
+              "nationality": "India",
+              "points": null
+            }
+          ],
+          "rounds": [
+            {
+              "round": 1,
+              "date_from": "2023-11-04",
+              "date_to": "2023-11-05",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 2,
+              "date_from": "2023-11-04",
+              "date_to": "2023-11-05",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 3,
+              "date_from": "2023-12-09",
+              "date_to": "2023-12-10",
+              "venue": "Madras International Circuit (Short Circuit)",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 4,
+              "date_from": "2023-12-16",
+              "date_to": "2023-12-17",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            }
+          ],
+          "champion": {
+            "name": "Cooper Webster",
+            "wins": 7,
+            "podiums": 9,
+            "points": 282.5
+          }
+        },
+        {
+          "year": 2024,
+          "drivers": [
+            {
+              "name": "Jayden Hamilton",
+              "nationality": "Australia",
+              "points": null
+            },
+            {
+              "name": "Isaac Demellweek",
+              "nationality": "Australia",
+              "points": null
+            },
+            {
+              "name": "Mira Erda",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Chetan Korada",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Dillon Zaharic",
+              "nationality": "India",
+              "points": null
+            },
+            {
+              "name": "Hary Noah",
+              "nationality": "Canada",
+              "points": null
+            }
+          ],
+          "rounds": [
+            {
+              "round": 1,
+              "date_from": "2024-08-24",
+              "date_to": "2024-08-25",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 2,
+              "date_from": "2024-08-31",
+              "date_to": "2024-09-01",
+              "venue": "Chennai Street Circuit",
+              "track_slug": null
+            },
+            {
+              "round": 3,
+              "date_from": "2024-09-14",
+              "date_to": "2024-09-15",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 4,
+              "date_from": "2024-10-19",
+              "date_to": "2024-10-20",
+              "venue": "Kari Motor Speedway",
+              "track_slug": "kari-motor-speedway"
+            },
+            {
+              "round": 5,
+              "date_from": "2024-11-16",
+              "date_to": "2024-11-17",
+              "venue": "Kari Motor Speedway",
+              "track_slug": "kari-motor-speedway"
+            }
+          ]
+        },
+        {
+          "year": 2025,
+          "drivers": [
+            {
+              "name": "Kareen Kaur",
+              "nationality": "Singapore",
+              "points": null
+            },
+            {
+              "name": "Shane Chandaria",
+              "nationality": "Kenya",
+              "points": null
+            },
+            {
+              "name": "Veer Sheth",
+              "nationality": "India",
+              "points": null
+            }
+          ],
+          "rounds": [
+            {
+              "round": 1,
+              "date_from": "2025-08-16",
+              "date_to": "2025-08-17",
+              "venue": "Kari Motor Speedway",
+              "track_slug": "kari-motor-speedway"
+            },
+            {
+              "round": 2,
+              "date_from": "2025-08-23",
+              "date_to": "2025-08-24",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            },
+            {
+              "round": 3,
+              "date_from": "2025-10-04",
+              "date_to": "2025-10-05",
+              "venue": "Kari Motor Speedway",
+              "track_slug": "kari-motor-speedway"
+            },
+            {
+              "round": 4,
+              "date_from": "2025-11-15",
+              "date_to": "2025-11-16",
+              "venue": "Kari Motor Speedway",
+              "track_slug": "kari-motor-speedway"
+            },
+            {
+              "round": 5,
+              "date_from": "2025-12-14",
+              "date_to": "2025-12-14",
+              "venue": "Madras International Circuit",
+              "track_slug": "madras-international-circuit"
+            }
+          ],
+          "champion": {
+            "name": "Shane Chandaria",
+            "wins": null,
+            "podiums": null,
+            "points": 187
+          }
+        }
+      ]
+    }
+  ]
+}

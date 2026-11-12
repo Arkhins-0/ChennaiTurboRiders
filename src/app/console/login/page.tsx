@@ -4,7 +4,7 @@ import { getSession } from "@/lib/server/auth";
 import { LoginForm } from "@/admin/screens/login/LoginForm";
 
 export const metadata: Metadata = {
-  title: "Sign In · CTR Admin",
+  title: "Sign in · CTR Console",
   robots: { index: false, follow: false },
 };
 

@@ -53,6 +53,9 @@ export function revalidateDriverPages(): void {
   revalidatePath("/");
   revalidatePath("/drivers");
   revalidatePath("/drivers/[slug]", "page");
+  // The year rosters draw a profile's portrait and link, and /history its name.
+  revalidatePath("/drivers/season/[year]", "page");
+  revalidatePath("/history");
   revalidatePath("/sitemap.xml");
 }
 

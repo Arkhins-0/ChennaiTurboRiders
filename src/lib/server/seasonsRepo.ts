@@ -4,11 +4,16 @@ import { cache } from "react";
 import {
   SEASON_STATUSES,
   currentSeason,
+  normaliseChampionshipInput,
+  normaliseLineup,
   normaliseSeasonInput,
+  type Championship,
+  type LineupEntry,
   type Season,
   type SeasonSummary,
 } from "@/lib/seasons";
 import { oneOf } from "@/lib/normalise";
+import { eventEnd, eventStart } from "@/lib/raceDates";
 import { type SlugHolder } from "@/lib/slug";
 import { getSql } from "@/lib/server/db";
 import { calendarSlugTaken, findCalendarSlugOwner } from "@/lib/server/calendarSlugs";
@@ -34,7 +39,9 @@ import {
 
 const DUPLICATE = "23505";
 
-const COLUMNS = `n.id, n.site_id, n.name, n.subtitle, n.status, n.cover_image, n.sort_order`;
+const COLUMNS = `n.id, n.site_id, n.name, n.subtitle, n.status, n.cover_image, n.sort_order,
+  n.championship_id, n.year, n.car, n.team_position, n.team_result, n.team_points::float8 AS team_points,
+  n.champion, n.notes`;
 
 const SLUG = `
   (SELECT s.slug FROM ctr.slugs s
@@ -54,6 +61,14 @@ type SummaryRow = {
   cover_image: string;
   sort_order: number;
   slug: string | null;
+  championship_id: string | null;
+  year: number | null;
+  car: string;
+  team_position: number | null;
+  team_result: string;
+  team_points: number | null;
+  champion: string;
+  notes: string;
   /** Only on the console's list — how many rounds would go with it. */
   rounds?: number;
 };
@@ -70,6 +85,14 @@ function summarise(row: SummaryRow): SeasonSummary {
     subtitle: row.subtitle,
     cover_image: row.cover_image,
     sort_order: row.sort_order,
+    championship_id: row.championship_id ?? "",
+    year: row.year,
+    car: row.car,
+    team_position: row.team_position,
+    team_result: row.team_result,
+    team_points: row.team_points,
+    champion: row.champion,
+    notes: row.notes,
   };
 }
 
@@ -182,6 +205,44 @@ export const currentPublishedSeason = cache(
   }
 );
 
+/**
+ * Every season being raced right now, soonest next round first.
+ *
+ * The team races in more than one league, and in a year when two of them run
+ * at once a single "current season" hides one of them. A season counts as
+ * running while any of its rounds has not finished. When none is, this falls
+ * back to the one `currentPublishedSeason` picks, so the calendar never goes
+ * blank between seasons.
+ */
+export const currentPublishedSeasons = cache(
+  async (
+    siteId: string,
+    now: Date = new Date()
+  ): Promise<{ season: SeasonSummary; events: EventOfSeason[] }[]> => {
+    const [seasons, events] = await Promise.all([
+      listPublishedSeasons(siteId),
+      listPublishedEvents(siteId),
+    ]);
+
+    const nextStart = (list: EventOfSeason[]) =>
+      Math.min(
+        ...list
+          .filter((e) => (eventEnd(e)?.getTime() ?? -Infinity) >= now.getTime())
+          .map((e) => eventStart(e)?.getTime() ?? Infinity)
+      );
+
+    const running = seasons
+      .map((season) => ({ season, events: events.filter((e) => e.season_id === season.id) }))
+      .filter((entry) => Number.isFinite(nextStart(entry.events)))
+      .sort((a, b) => nextStart(a.events) - nextStart(b.events));
+
+    if (running.length > 0) return running;
+
+    const one = currentSeason(seasons, events, now);
+    return one ? [{ season: one, events: events.filter((e) => e.season_id === one.id) }] : [];
+  }
+);
+
 /** What `listPublishedEvents` returns, named here so the signature above reads. */
 type EventOfSeason = Awaited<ReturnType<typeof listPublishedEvents>>[number];
 
@@ -275,10 +336,15 @@ async function insertSeason(
   const order = s.sort_order || year || null;
 
   const rows = (await sql`
-    INSERT INTO ctr.seasons (site_id, name, subtitle, status, cover_image, sort_order)
+    INSERT INTO ctr.seasons (site_id, name, subtitle, status, cover_image, sort_order,
+                             championship_id, year, car, team_position, team_result,
+                             team_points, champion, notes)
     VALUES (${siteId}, ${s.name}, ${s.subtitle}, ${s.status}, ${s.cover_image},
             coalesce(${order}::int,
-                     (SELECT coalesce(max(sort_order), 0) + 1 FROM ctr.seasons WHERE site_id = ${siteId})))
+                     (SELECT coalesce(max(sort_order), 0) + 1 FROM ctr.seasons WHERE site_id = ${siteId})),
+            (SELECT id FROM ctr.championships WHERE id::text = ${s.championship_id} AND site_id = ${siteId}),
+            ${s.year}, ${s.car}, ${s.team_position}, ${s.team_result},
+            ${s.team_points}, ${s.champion}, ${s.notes})
     RETURNING id
   `) as { id: string }[];
 
@@ -349,6 +415,15 @@ export async function updateSeason(
            status      = ${s.status},
            cover_image = ${s.cover_image},
            sort_order  = ${s.sort_order},
+           championship_id = (SELECT c.id FROM ctr.championships c
+                               WHERE c.id::text = ${s.championship_id} AND c.site_id = ${existing.site_id}),
+           year          = ${s.year},
+           car           = ${s.car},
+           team_position = ${s.team_position},
+           team_result   = ${s.team_result},
+           team_points   = ${s.team_points},
+           champion      = ${s.champion},
+           notes         = ${s.notes},
            updated_at  = now()
      WHERE id = ${id}
     RETURNING id
@@ -404,4 +479,77 @@ export async function moveEventsToSeason(
   `) as { id: string }[];
 
   return rows.length;
+}
+
+/* ─────────────────────────────── The lineup ─────────────────────────── */
+
+/** Who drove for the team that season, in order. */
+export async function listLineup(seasonId: string): Promise<LineupEntry[]> {
+  const sql = getSql();
+  const rows = (await sql`
+    SELECT coalesce(driver_id::text, '') AS driver_id, name, nationality, points::float8 AS points
+      FROM ctr.season_drivers
+     WHERE season_id = ${seasonId}
+     ORDER BY sort_order, created_at
+  `) as LineupEntry[];
+  return rows;
+}
+
+/**
+ * Replaces a season's lineup with what the editor sent.
+ *
+ * Wholesale, in one transaction: the editor shows the whole list and saves the
+ * whole list, so a diff would only be a way to get it subtly wrong. A driver id
+ * from another site is dropped to NULL by the join, the same rule the events
+ * repo applies to circuits — the name is kept, the link is not.
+ */
+export async function replaceLineup(seasonId: string, input: unknown): Promise<LineupEntry[]> {
+  const sql = getSql();
+  const rows = normaliseLineup(input);
+
+  await sql.transaction([
+    sql`DELETE FROM ctr.season_drivers WHERE season_id = ${seasonId}`,
+    ...rows.map(
+      (row, i) => sql`
+        INSERT INTO ctr.season_drivers (season_id, driver_id, name, nationality, points, sort_order)
+        SELECT ${seasonId}, d.id, ${row.name}, ${row.nationality}, ${row.points}, ${(i + 1) * 10}
+          FROM ctr.seasons s
+          LEFT JOIN ctr.drivers d ON d.id::text = ${row.driver_id} AND d.site_id = s.site_id
+         WHERE s.id = ${seasonId}
+      `
+    ),
+  ]);
+
+  return listLineup(seasonId);
+}
+
+/* ─────────────────────────────── Leagues ────────────────────────────── */
+
+export async function listChampionships(siteId: string): Promise<Championship[]> {
+  const sql = getSql();
+  return (await sql`
+    SELECT id, slug, name, short_name, website, sort_order
+      FROM ctr.championships
+     WHERE site_id = ${siteId}
+     ORDER BY sort_order, name
+  `) as Championship[];
+}
+
+/**
+ * Adds a league. A slug already in use gets the existing row back rather than
+ * an error: typing "Indian Racing League" twice means the one that is there.
+ */
+export async function createChampionship(siteId: string, input: unknown): Promise<Championship> {
+  const sql = getSql();
+  const c = normaliseChampionshipInput(input);
+  if (!c.name) throw Object.assign(new Error("A league needs a name."), { code: "22023" });
+
+  const rows = (await sql`
+    INSERT INTO ctr.championships (site_id, slug, name, short_name, website, sort_order)
+    VALUES (${siteId}, ${c.slug}, ${c.name}, ${c.short_name}, ${c.website},
+            (SELECT coalesce(max(sort_order), 0) + 10 FROM ctr.championships WHERE site_id = ${siteId}))
+    ON CONFLICT (site_id, slug) DO UPDATE SET updated_at = now()
+    RETURNING id, slug, name, short_name, website, sort_order
+  `) as Championship[];
+  return rows[0];
 }

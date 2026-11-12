@@ -30,6 +30,83 @@
   }
 
   /*
+   * The console's palette, as "r g b" triples so Tailwind's /opacity works
+   * (tailwind.config.ts maps the console's colour names onto these).
+   *
+   * A workspace's look: white pages, a quiet grey sidebar, hairline borders,
+   * near-black type in three greys and one violet accent. It follows the OS:
+   * the dark set below applies under `prefers-color-scheme: dark`, and there is
+   * no setting for it. On :root rather than on the console's subtree so the
+   * dialogs and the jump palette, which are portalled to <body>, have them too;
+   * the public site uses none of these names, so it is untouched.
+   *
+   *   bg     a page            card   a card, a menu      line   borders
+   *   high   a raised surface  rail   the sidebar         fg     text
+   *   soft   quieter text      faint  the quietest        primary  the accent
+   */
+  :root {
+    --c-bg: 255 255 255;
+    --c-card: 255 255 255;
+    --c-line: 231 233 238;
+    --c-input: 222 225 231;
+    --c-high: 247 248 250;
+    --c-rail: 249 250 251;
+    --c-fg: 30 32 40;
+    --c-soft: 82 87 102;
+    --c-faint: 128 133 148;
+    --c-primary: 123 104 238;
+    --c-primary-deep: 106 86 224;
+    --c-on-primary: 255 255 255;
+    --c-danger: 220 53 69;
+    --c-ok: 21 128 61;
+    --c-warn: 161 98 7;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --c-bg: 24 25 28;
+      --c-card: 31 32 37;
+      --c-line: 47 49 56;
+      --c-input: 58 60 68;
+      --c-high: 37 38 44;
+      --c-rail: 28 29 33;
+      --c-fg: 233 234 239;
+      --c-soft: 172 176 189;
+      --c-faint: 124 128 143;
+      --c-primary: 169 155 255;
+      --c-primary-deep: 189 178 255;
+      /* The dark accent is light, so what sits on it is near-black. */
+      --c-on-primary: 20 18 38;
+      --c-danger: 244 96 108;
+      --c-ok: 74 222 128;
+      --c-warn: 250 204 21;
+    }
+  }
+
+  /*
+   * The console's document: its own background behind the shell (so an
+   * overscroll never shows the site's black), and native controls — date
+   * pickers, scrollbars, checkboxes — drawn for the scheme the console is in
+   * rather than for the site's permanent dark.
+   */
+  html:has([data-console]) {
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    html:has([data-console]) {
+      color-scheme: dark;
+    }
+  }
+  html:has([data-console]) body {
+    background-color: rgb(var(--c-bg));
+    color: rgb(var(--c-fg));
+  }
+
+  .font-ui {
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  /*
    * The console is an application, not a document.
    *
    * Its shell is `h-screen` with each pane scrolling on its own, and that is
@@ -46,8 +123,8 @@
    * hydration.
    *
    * The breakpoint matches the shell's. Below `md:` the console deliberately IS
-   * one scrolling document — the sidebar becomes a row of chips and the panes
-   * stack — and locking it there would strand everything below the fold.
+   * one scrolling document — the sidebar becomes an off-canvas drawer and the
+   * panes stack — and locking it there would strand everything below the fold.
    */
   @media (min-width: 768px) {
     html:has([data-admin-shell]),
@@ -90,8 +167,13 @@
 
   .font-ui option,
   .font-ui optgroup {
-    background-color: #2c2c2c; /* card */
-    color: #fbfbfb; /* foreground */
+    background-color: rgb(var(--c-card));
+    color: rgb(var(--c-fg));
+  }
+
+  .font-ui ::selection {
+    background: rgb(var(--c-primary) / 0.22);
+    color: inherit;
   }
 
   ::-webkit-scrollbar {
@@ -114,6 +196,68 @@
     outline: 3px solid #f7d619;
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  /* The console's own: thin hairline scrollbars and a violet focus ring. The
+     document's bar is included, for the phone width where the console scrolls
+     as a page. */
+  html:has([data-console])::-webkit-scrollbar-track,
+  .font-ui ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  html:has([data-console])::-webkit-scrollbar-thumb,
+  .font-ui ::-webkit-scrollbar-thumb {
+    background: rgb(var(--c-line));
+    border-radius: 999px;
+    border: 2px solid rgb(var(--c-bg));
+  }
+  html:has([data-console])::-webkit-scrollbar-thumb:hover,
+  .font-ui ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--c-faint));
+  }
+  .font-ui :focus-visible {
+    outline: 2px solid rgb(var(--c-primary));
+    outline-offset: 2px;
+  }
+}
+
+/*
+ * The console's loading placeholders (src/admin/ui/Skeleton.tsx) and its
+ * message bars (src/admin/components/Toasts.tsx). Still for those who ask for
+ * less motion.
+ */
+@layer components {
+  .skeleton {
+    background-color: rgb(var(--c-fg) / 0.07);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton {
+      background-image: linear-gradient(90deg, transparent 0%, rgb(var(--c-fg) / 0.06) 50%, transparent 100%);
+      background-size: 50% 100%;
+      background-repeat: no-repeat;
+      animation: skeleton-shimmer 1.6s ease-in-out infinite;
+    }
+    .toast-in {
+      animation: toast-in 180ms ease-out;
+    }
+  }
+  @keyframes skeleton-shimmer {
+    from {
+      background-position: -100% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 

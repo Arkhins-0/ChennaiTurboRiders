@@ -1,5 +1,6 @@
 import "server-only";
 
+import { revalidatePath } from "next/cache";
 import { revalidateEventPages } from "@/lib/server/revalidateEvents";
 import { type SiteRef } from "@/lib/sites";
 
@@ -18,4 +19,8 @@ import { type SiteRef } from "@/lib/sites";
  */
 export function revalidateSeasonPages(site: SiteRef): void {
   revalidateEventPages(site);
+  // A season's league, lineup and result are drawn on /history and on the
+  // profile of every driver in its lineup.
+  revalidatePath("/history");
+  revalidatePath("/drivers", "layout");
 }

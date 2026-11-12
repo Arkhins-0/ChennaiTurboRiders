@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { DriverPoster } from "@/components/site/DriverPoster";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
-import { siteDrivers } from "@/lib/server/siteContent";
+import { RosterYears } from "@/components/site/RosterYears";
+import { siteDrivers, siteRosterYears } from "@/lib/server/siteContent";
 
 export const metadata: Metadata = {
   title: "Drivers",
@@ -15,7 +16,7 @@ const groups = [
 ];
 
 export default async function DriversPage() {
-  const drivers = await siteDrivers();
+  const [drivers, years] = await Promise.all([siteDrivers(), siteRosterYears()]);
 
   return (
     <>
@@ -27,6 +28,7 @@ export default async function DriversPage() {
       />
 
       <div className="section-container space-y-24 py-16 md:py-24">
+        {years.length > 0 ? <RosterYears years={years} active="current" /> : null}
         {groups.map((g, gi) => {
           const list = drivers.filter((d) => d.championship === g.key);
           if (list.length === 0) return null;

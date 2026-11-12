@@ -47,14 +47,14 @@ export function EditorToolbar({
 }) {
   return (
     <div className={cn("shrink-0 space-y-2", className)}>
-      <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2">
-        <Icon className="size-5 shrink-0 text-muted-fg" />
+      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2 shadow-card">
+        <Icon className="size-5 shrink-0 text-faint" />
 
         <div className="mr-auto min-w-0">
-          <h1 className="truncate text-[13px] font-medium tracking-tight text-foreground">
+          <h1 className="truncate text-[13px] font-semibold text-foreground">
             {title}
           </h1>
-          <p className="truncate text-[11px] text-muted-fg">{hint}</p>
+          <p className="truncate text-[11px] text-faint">{hint}</p>
         </div>
 
         {dirty ? (

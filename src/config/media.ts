@@ -2,7 +2,7 @@
  * The one place the media host is decided.
  *
  * Everything uploaded through the admin's media library is served from here:
- * the URLs `src/config/images.ts` builds for the defaults, the preconnect in
+ * the preconnect in
  * `src/app/layout.tsx`, and — through the same env var — the absolute URL
  * `publicUrl()` hands back to the admin on upload (`src/lib/server/s3.ts`).
  *
