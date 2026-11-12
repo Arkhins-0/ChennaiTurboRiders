@@ -125,15 +125,6 @@ export function EventForm({
             disabled={busy}
           />
 
-          <Field
-            label="Chip"
-            value={event.badge}
-            onChange={(badge) => set({ badge })}
-            maxLength={EVENT_LIMITS.badge}
-            placeholder="Entries open"
-            hint="A short note beside the name. Blank hides it. Not the same as the status above — this one is words for a visitor."
-          />
-
           {event.status === "published" && event.slug ? (
             <a
               href={`${siteUrl}/schedule`}

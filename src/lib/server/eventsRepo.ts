@@ -41,7 +41,7 @@ const DUPLICATE = "23505";
 /** Everything but the body. The addresses are joined on. */
 const SUMMARY =
   `e.id, e.site_id, e.season_id, e.round, e.title, e.subtitle, e.venue, e.city,
-   e.track_id, e.date_from, e.date_to, e.dates, e.badge,
+   e.track_id, e.date_from, e.date_to, e.dates,
    e.status, e.cover_image, e.sort_order`;
 
 const SLUG = `
@@ -66,7 +66,6 @@ type SummaryRow = {
   date_from: string | Date | null;
   date_to: string | Date | null;
   dates: string;
-  badge: string;
   status: string;
   cover_image: string;
   sort_order: number;
@@ -116,7 +115,6 @@ function summarise(row: SummaryRow): EventSummary {
     date_from: dateText(row.date_from),
     date_to: dateText(row.date_to),
     dates: row.dates,
-    badge: row.badge,
     cover_image: row.cover_image,
     sort_order: row.sort_order,
   };
@@ -330,12 +328,12 @@ async function insertEvent(
 
   const rows = (await sql`
     INSERT INTO ctr.events (site_id, season_id, round, title, subtitle, venue, city,
-                            track_id, date_from, date_to, dates, badge,
+                            track_id, date_from, date_to, dates,
                             status, cover_image, body, sort_order)
     VALUES (${siteId}, ${await seasonOf(siteId, e.season_id)},
             ${e.round}, ${e.title}, ${e.subtitle}, ${e.venue}, ${e.city},
             (SELECT id FROM ctr.tracks WHERE id::text = ${e.track_id} AND site_id = ${siteId}),
-            ${e.date_from || null}, ${e.date_to || null}, ${e.dates}, ${e.badge},
+            ${e.date_from || null}, ${e.date_to || null}, ${e.dates},
             ${e.status}, ${e.cover_image}, ${JSON.stringify(e.body)}::jsonb, ${e.sort_order})
     RETURNING id
   `) as { id: string }[];
@@ -421,7 +419,6 @@ export async function updateEvent(
            date_from   = ${e.date_from || null},
            date_to     = ${e.date_to || null},
            dates       = ${e.dates},
-           badge       = ${e.badge},
            status      = ${e.status},
            cover_image = ${e.cover_image},
            body        = ${JSON.stringify(e.body)}::jsonb,

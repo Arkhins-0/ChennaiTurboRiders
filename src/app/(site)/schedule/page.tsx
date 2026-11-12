@@ -4,7 +4,15 @@ import { ArrowRight, Compass, CornerUpRight, MapPin, Ruler } from "lucide-react"
 import { CountdownTimer } from "@/components/site/CountdownTimer";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
-import { eventDateLabel, eventDateParts, eventIsPast, eventStart, nextEventIndex } from "@/lib/raceDates";
+import {
+  ROUND_STATUS_LABELS,
+  eventDateLabel,
+  eventDateParts,
+  eventIsPast,
+  eventStart,
+  nextEventIndex,
+  roundStatus,
+} from "@/lib/raceDates";
 import { currentPublishedSeasons } from "@/lib/server/seasonsRepo";
 import { getRootSite } from "@/lib/server/sitesRepo";
 import { getTrack } from "@/lib/server/tracksRepo";
@@ -110,6 +118,7 @@ export default async function SchedulePage() {
               {rounds.map((event, i) => {
                 const isNext = event.id === upcoming?.id;
                 const past = eventIsPast(event, now);
+                const status = roundStatus(event, rounds, now);
                 const parts = eventDateParts(event);
                 return (
                   <Reveal
@@ -138,20 +147,18 @@ export default async function SchedulePage() {
                     </div>
 
                     <div className="hidden md:block">
-                      {/* A run round is complete whatever its badge said
-                          beforehand — "Entries open" on a finished weekend
-                          is the badge nobody remembered to change. */}
-                      {past ? (
-                        <span className="readout text-[10px]">Complete</span>
-                      ) : event.badge ? (
-                        <span className="readout border border-white/15 px-2 py-1 text-[10px] text-carbon-200">
-                          {event.badge}
-                        </span>
-                      ) : isNext ? (
+                      {/* Worked out from the dates — see roundStatus. */}
+                      {status === "next" ? (
                         <span className="readout bg-racing-yellow px-2 py-1 text-[10px] font-semibold text-carbon-950">
                           Next
                         </span>
-                      ) : null}
+                      ) : status === "complete" ? (
+                        <span className="readout text-[10px]">Complete</span>
+                      ) : (
+                        <span className="readout border border-white/15 px-2 py-1 text-[10px] text-carbon-200">
+                          {ROUND_STATUS_LABELS[status]}
+                        </span>
+                      )}
                     </div>
 
                     <div className="text-right">

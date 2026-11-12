@@ -279,7 +279,7 @@ async function seedEvents(siteId) {
   for (const [index, event] of SEED_EVENTS.entries()) {
     const [{ id }] = await sql`
       INSERT INTO ctr.events (site_id, season_id, round, title, subtitle, venue, city,
-                              track_id, date_from, date_to, dates, badge,
+                              track_id, date_from, date_to, dates,
                               status, cover_image, sort_order)
       VALUES (
         ${siteId}, ${seasons.get(yearOf(event)) ?? fallbackSeason},
@@ -287,7 +287,7 @@ async function seedEvents(siteId) {
         ${event.venue ?? ""}, ${event.city ?? ""},
         (SELECT id FROM ctr.tracks WHERE site_id = ${siteId} AND slug = ${event.track_slug ?? ""}),
         ${event.date_from || null}, ${event.date_to || null},
-        ${event.dates ?? ""}, ${event.badge ?? ""},
+        ${event.dates ?? ""},
         ${event.status ?? "draft"}, ${event.cover_image ?? ""},
         ${event.sort_order ?? (index + 1) * 10}
       )

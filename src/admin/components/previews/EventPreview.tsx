@@ -127,11 +127,6 @@ export function EventPreview({
                           {event.round}
                         </span>
                       ) : null}
-                      {event.badge ? (
-                        <span className="rounded-full border border-line px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-fg-faint">
-                          {event.badge}
-                        </span>
-                      ) : null}
                       {event.status === "draft" ? (
                         <span className="rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-accent-ink">
                           Draft

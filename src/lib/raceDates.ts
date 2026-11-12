@@ -162,3 +162,39 @@ export function nextEventIndex(events: readonly Dated[], now: Date): number {
 
   return best;
 }
+
+/* ─────────────────────────── A round's label ─────────────────────────── */
+
+export type RoundStatus = "complete" | "next" | "finale" | "upcoming";
+
+export const ROUND_STATUS_LABELS: Record<RoundStatus, string> = {
+  complete: "Complete",
+  next: "Next",
+  finale: "Season finale",
+  upcoming: "Upcoming",
+};
+
+/**
+ * What a round's chip says, worked out rather than typed.
+ *
+ * The site does not take entries — it shows the team's calendar — so the old
+ * free-text badge ("Entries open") had nothing true to say and was wrong the
+ * moment a weekend was run. Run → Complete; the next one → Next; the last of
+ * its season → Season finale; anything else → Upcoming. "Next" wins over
+ * "Season finale" when the finale is the next round.
+ *
+ * `season` is every round of the same season, in any order.
+ */
+export function roundStatus(event: Dated, season: readonly Dated[], now: Date): RoundStatus {
+  const end = eventEnd(event);
+  if (end && end.getTime() < now.getTime()) return "complete";
+
+  const next = nextEventIndex(season, now);
+  if (next >= 0 && season[next] === event) return "next";
+
+  const latest = Math.max(...season.map((e) => eventStart(e)?.getTime() ?? -Infinity));
+  const start = eventStart(event)?.getTime();
+  if (start !== undefined && start === latest && season.length > 1) return "finale";
+
+  return "upcoming";
+}

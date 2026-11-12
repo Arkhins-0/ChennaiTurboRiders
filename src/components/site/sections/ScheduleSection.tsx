@@ -2,7 +2,15 @@ import { MapPin } from "lucide-react";
 import { CountdownTimer } from "@/components/site/CountdownTimer";
 import { Reveal } from "@/components/site/Reveal";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { eventDateLabel, eventDateParts, eventIsPast, eventStart, nextEventIndex } from "@/lib/raceDates";
+import {
+  ROUND_STATUS_LABELS,
+  eventDateLabel,
+  eventDateParts,
+  eventIsPast,
+  eventStart,
+  nextEventIndex,
+  roundStatus,
+} from "@/lib/raceDates";
 import { currentPublishedSeasons } from "@/lib/server/seasonsRepo";
 import { getRootSite } from "@/lib/server/sitesRepo";
 import { getTrack } from "@/lib/server/tracksRepo";
@@ -86,6 +94,7 @@ export async function ScheduleSection() {
               {rounds.map((event, i) => {
                 const isNext = event.id === upcoming?.id;
                 const past = eventIsPast(event, now);
+                const status = roundStatus(event, rounds, now);
                 const parts = eventDateParts(event);
                 return (
                   <li
@@ -107,8 +116,9 @@ export async function ScheduleSection() {
                       </p>
                       <p className="readout mt-1 truncate text-[10px]">
                         {event.subtitle || event.city}
-                        {event.badge ? <span className="ml-2 text-racing-yellow">· {event.badge}</span> : null}
-                        {isNext ? <span className="ml-2 text-racing-yellow">· Next</span> : null}
+                        {status === "next" || status === "finale" ? (
+                          <span className="ml-2 text-racing-yellow">· {ROUND_STATUS_LABELS[status]}</span>
+                        ) : null}
                       </p>
                     </div>
                     <div className="text-right">

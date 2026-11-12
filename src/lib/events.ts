@@ -27,12 +27,12 @@
  * rendering of a date nobody has fixed, and it is why the dates are not
  * required.
  *
- * ── `status` and `badge` are different things ─────────────────────────────
+ * ── `status` is draft or published, nothing else ──────────────────────────
  *
- * `status` is draft or published, as everywhere else in this schema. `badge` is
- * the free-text chip the card prints — "Entries open", "Season finale" — which
- * was called `status` when it was the only one on the table, and was renamed by
- * migration 0018 so that neither has to be read twice.
+ * The chip a round shows on the site ("Next", "Complete", "Season finale") is
+ * worked out from the dates by roundStatus in src/lib/raceDates.ts. There used
+ * to be a free-text `badge` for it; migration 0027 dropped it, because typed
+ * words like "Entries open" went stale the moment a weekend was run.
  *
  * Shared by the server and the browser, so nothing here may import `server-only`.
  */
@@ -62,8 +62,6 @@ export const EVENT_LIMITS = {
   city: 120,
   /** The printed date line, when the two dates cannot say it. */
   dates: 80,
-  /** The chip on the card. */
-  badge: 40,
 } as const;
 
 export type CtrEvent = {
@@ -108,8 +106,6 @@ export type CtrEvent = {
   date_to: string;
   /** Overrides the printed date range. Blank writes it from the two dates. */
   dates: string;
-  /** The free-text chip. Blank hides it. */
-  badge: string;
 
   cover_image: string;
   body: RichDoc;
@@ -131,7 +127,6 @@ export const BLANK_EVENT: Omit<CtrEvent, "id" | "site_id"> = {
   date_from: "",
   date_to: "",
   dates: "",
-  badge: "",
   cover_image: "",
   body: EMPTY_DOC,
   former_slugs: [],
@@ -278,7 +273,6 @@ export function normaliseEventInput(
     date_from: isoDate(record.date_from),
     date_to: isoDate(record.date_to),
     dates: optionalText(record.dates, EVENT_LIMITS.dates),
-    badge: optionalText(record.badge, EVENT_LIMITS.badge),
     cover_image: image(record.cover_image, ""),
     body: normaliseRichText(record.body, notes),
     // Every address it has ever answered to, minus the one it answers to now —

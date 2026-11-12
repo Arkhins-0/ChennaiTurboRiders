@@ -123,7 +123,6 @@ export type EventsRow = {
   date_from: string | null;
   date_to: string | null;
   dates: string;
-  badge: string;
   status: string;
   cover_image: string;
   body: unknown;
