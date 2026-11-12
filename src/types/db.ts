@@ -75,6 +75,18 @@ export type CarSpecsRow = {
   value: string;
 };
 
+export type ChampionshipsRow = {
+  id: string;
+  site_id: string;
+  slug: string;
+  name: string;
+  short_name: string;
+  website: string;
+  sort_order: number;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export type DriverHighlightsRow = {
   driver_id: string;
   position: number;
@@ -139,6 +151,18 @@ export type SchemaMigrationsRow = {
   applied_at: Date;
 };
 
+export type SeasonDriversRow = {
+  id: string;
+  season_id: string;
+  driver_id: string | null;
+  name: string;
+  nationality: string;
+  points: string | null;
+  sort_order: number;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export type SeasonsRow = {
   id: string;
   site_id: string;
@@ -149,6 +173,14 @@ export type SeasonsRow = {
   sort_order: number;
   created_at: Date;
   updated_at: Date;
+  championship_id: string | null;
+  year: number | null;
+  car: string;
+  team_position: number | null;
+  team_result: string;
+  team_points: string | null;
+  champion: string;
+  notes: string;
 };
 
 export type SessionsRow = {
@@ -286,10 +318,12 @@ export type CtrTables = {
   articles: ArticlesRow;
   car: CarRow;
   car_specs: CarSpecsRow;
+  championships: ChampionshipsRow;
   driver_highlights: DriverHighlightsRow;
   drivers: DriversRow;
   events: EventsRow;
   schema_migrations: SchemaMigrationsRow;
+  season_drivers: SeasonDriversRow;
   seasons: SeasonsRow;
   sessions: SessionsRow;
   site_modules: SiteModulesRow;
