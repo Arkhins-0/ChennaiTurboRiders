@@ -1,6 +1,6 @@
 # Chennai Turbo Riders
 
-The public site at **chennaiturboriders.in** and the console that edits it, in one
+The public site at **chennaiturboriders.com** and the console that edits it, in one
 Next.js application. Which of the two a request gets is decided by its `Host`
 header — see [The two front doors](#the-two-front-doors).
 
@@ -38,7 +38,7 @@ One build, one process, one database connection. `src/middleware.ts` reads the
 
 | Host | What it serves |
 |---|---|
-| `ADMIN_HOSTS` (e.g. `admin.chennaiturboriders.in`) | the console, at its own root — `/`, `/media`, `/login` |
+| `ADMIN_HOSTS` (e.g. `admin.chennaiturboriders.com`) | the console, at its own root — `/`, `/media`, `/login` |
 | anything else | the public site, and nothing else |
 
 The console lives at `src/app/console` on disk, which is a router detail and

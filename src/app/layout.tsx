@@ -60,11 +60,17 @@ export const metadata: Metadata = {
   keywords: [...SEO.keywords],
   authors: [{ name: SITE.name }],
   icons: { icon: SEO.logo },
-  alternates: { canonical: "/" },
+  /*
+   * "./", not "/". Every page inherits this, and "/" made every page — the
+   * drivers, the history, each article — declare the HOME page as its
+   * canonical, which tells a search engine they are all duplicates of it.
+   * "./" resolves against each page's own path, so each page names itself.
+   */
+  alternates: { canonical: "./" },
   openGraph: {
     title: SEO.title,
     description: SEO.description,
-    url: SITE.url,
+    url: "./",
     siteName: SITE.name,
     type: "website",
     locale: SITE.locale,
