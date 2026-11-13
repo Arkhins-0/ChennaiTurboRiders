@@ -221,8 +221,8 @@ export async function createDriver(siteId: string, input: unknown): Promise<Driv
 /**
  * Null when the id does not exist — the route turns that into a 404.
  *
- * Writes neither `slug` nor `sort_order`, and both omissions are deliberate.
- * The address is frozen once minted, for the reason the circuits route records:
+ * Writes `sort_order` never, and `slug` only to replace a placeholder (below).
+ * A real address is frozen once minted, for the reason the circuits route records:
  * ctr.slugs cannot hold a driver, so there is nowhere to write the redirect a
  * moved address would need. The position belongs to `reorderDrivers`, so a form
  * opened before somebody dragged the list cannot save a stale one back over it.
@@ -231,9 +231,29 @@ export async function updateDriver(id: string, input: unknown): Promise<Driver |
   const sql = getSql();
   const d = normaliseDriverInput(input);
 
+  /*
+   * The one exception to the frozen address. "Add driver" creates the row as
+   * "New Driver" before anyone has typed a name, so the address it mints is
+   * `new-driver`, `new-driver-2`… — a placeholder, never a name a visitor was
+   * given. The first save under a real name trades it for one minted from that
+   * name. Once it is a real name it is frozen as before.
+   */
+  const current = (await sql`
+    SELECT site_id, slug FROM ctr.drivers WHERE id = ${id}
+  `) as { site_id: string; slug: string }[];
+  if (current.length === 0) return null;
+
+  const placeholder = /^new-driver(-\d+)?$/.test(current[0].slug);
+  const named = slugify(`${d.firstName} ${d.lastName}`.trim());
+  const slug =
+    placeholder && named && named !== "new-driver"
+      ? await freeSlug(current[0].site_id, d.firstName, d.lastName)
+      : current[0].slug;
+
   const rows = (await sql`
     UPDATE ctr.drivers
-       SET first_name     = ${d.firstName},
+       SET slug           = ${slug},
+           first_name     = ${d.firstName},
            last_name      = ${d.lastName},
            nationality    = ${d.nationality},
            country_code   = ${d.countryCode},

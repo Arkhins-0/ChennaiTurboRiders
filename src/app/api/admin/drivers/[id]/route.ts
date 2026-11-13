@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { folderForEntity } from "@/lib/mediaPaths";
 import { guardRequestSite } from "@/lib/server/access";
 import { deleteDriver, getDriver, updateDriver } from "@/lib/server/driversRepo";
-import { deleteEntityFolder } from "@/lib/server/entityMedia";
+import { deleteEntityFolder, moveEntityFolder } from "@/lib/server/entityMedia";
 import { revalidateDriverPages } from "@/lib/server/revalidateTeam";
 import { isTeamRowId } from "@/lib/team";
 
@@ -10,14 +10,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /*
- * There is no folder MOVE on this route, and its absence is deliberate — the
- * same absence, for the same reason, as on the circuits route.
- *
- * A driver's address is minted once by `freeSlug` in `createDriver` and frozen:
- * `updateDriver` omits `slug` from its UPDATE and `DriverForm` has no control
- * for it, because ctr.slugs cannot hold a driver and so there is nowhere to
- * record the redirect a moved address would need. A driver's media folder is
- * named after that slug, so it cannot move either.
+ * A driver's address is frozen once it is a real name: `DriverForm` has no
+ * control for it, because ctr.slugs cannot hold a driver and so there is
+ * nowhere to record the redirect a moved address would need. The one move is
+ * the placeholder `new-driver` an unnamed "Add driver" mints, traded on the
+ * first save under a real name — nobody was ever given that address — and the
+ * media folder named after it moves with it (PUT, below).
  */
 
 type Params = { params: Promise<{ id: string }> };
@@ -48,9 +46,27 @@ export async function PUT(request: Request, { params }: Params) {
   }
 
   try {
-    const driver = await updateDriver(id, body);
-    if (!driver) {
+    const before = await getDriver(id);
+    let driver = await updateDriver(id, body);
+    if (!before || !driver) {
       return NextResponse.json({ error: "No such driver." }, { status: 404 });
+    }
+
+    /*
+     * A placeholder address (`new-driver`) is traded for a real one on the
+     * first save under a name — see `updateDriver`. The pictures follow it, the
+     * way a season's do. Never fatal: the row is already written.
+     */
+    if (before.slug !== driver.slug) {
+      try {
+        await moveEntityFolder(
+          folderForEntity(guard.site.slug, "drivers", before.slug, id),
+          folderForEntity(guard.site.slug, "drivers", driver.slug, id)
+        );
+        driver = (await getDriver(id)) ?? driver;
+      } catch (error) {
+        console.error("[admin/drivers] folder move", error);
+      }
     }
 
     revalidateDriverPages();
